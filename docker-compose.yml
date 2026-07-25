@@ -1,0 +1,110 @@
+# RunbookOS — Docker Compose
+# Starts all infrastructure and application services.
+
+services:
+  # ---------- Data Layer ----------
+  postgres:
+    image: postgres:16-alpine
+    container_name: runbookos-postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-runbookos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_production}
+      POSTGRES_DB: ${POSTGRES_DB:-runbookos}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/docker/init-n8n-db.sh:/docker-entrypoint-initdb.d/init-n8n-db.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-runbookos}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: runbookos-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------- Orchestration ----------
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: runbookos-n8n
+    restart: unless-stopped
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-change_me_in_production}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-replace-with-a-strong-random-encryption-key}
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=${POSTGRES_USER:-runbookos}
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_production}
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://n8n:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ---------- Backend ----------
+  control-plane:
+    build:
+      context: ./services/control-plane
+      dockerfile: Dockerfile
+    container_name: runbookos-control-plane
+    restart: unless-stopped
+    ports:
+      - "${CONTROL_PLANE_PORT:-8080}:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-runbookos}
+      - POSTGRES_USER=${POSTGRES_USER:-runbookos}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_production}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - N8N_BASE_URL=http://n8n:5678
+      - INTERNAL_HMAC_SECRET=${INTERNAL_HMAC_SECRET:-replace-with-a-strong-random-hmac-secret}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ---------- Frontend ----------
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: runbookos-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://control-plane:8080
+    depends_on:
+      - control-plane
+
+volumes:
+  postgres_data:
+  redis_data:
+  n8n_data:

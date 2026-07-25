@@ -1,0 +1,9 @@
+{
+  "name": "@runbookos/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Generated TypeScript API client from the RunbookOS OpenAPI spec",
+  "scripts": {
+    "generate": "echo 'API client generation will be configured in Phase 2 after OpenAPI spec is available'"
+  }
+}

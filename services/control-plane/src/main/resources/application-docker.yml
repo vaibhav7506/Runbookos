@@ -1,0 +1,12 @@
+# Docker-specific overrides — hostnames resolve to Docker Compose service names
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/${POSTGRES_DB:runbookos}
+
+  data:
+    redis:
+      host: redis
+
+runbookos:
+  n8n:
+    base-url: http://n8n:5678

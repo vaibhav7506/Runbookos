@@ -1,0 +1,12 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    root: WARN
+    com.vaibhav.runbookos: INFO
