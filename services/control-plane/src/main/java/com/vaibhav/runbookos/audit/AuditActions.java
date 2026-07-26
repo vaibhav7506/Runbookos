@@ -44,6 +44,18 @@ public final class AuditActions {
   public static final String EXECUTION_CREATED = "EXECUTION_CREATED";
   public static final String EXECUTION_TRANSITIONED = "EXECUTION_TRANSITIONED";
   public static final String EXECUTION_RETRIED = "EXECUTION_RETRIED";
+  public static final String AI_PROVIDER_CONFIGURED = "AI_PROVIDER_CONFIGURED";
+  public static final String AI_PROVIDER_DISABLED = "AI_PROVIDER_DISABLED";
+  public static final String AI_ANALYSIS_COMPLETED = "AI_ANALYSIS_COMPLETED";
+  public static final String AI_ANALYSIS_REJECTED = "AI_ANALYSIS_REJECTED";
+  public static final String RUNBOOK_CREATED = "RUNBOOK_CREATED";
+  public static final String RUNBOOK_DRAFT_UPDATED = "RUNBOOK_DRAFT_UPDATED";
+  public static final String RUNBOOK_PUBLISHED = "RUNBOOK_PUBLISHED";
+  public static final String POLICY_DECIDED = "POLICY_DECIDED";
+  public static final String APPROVAL_REQUESTED = "APPROVAL_REQUESTED";
+  public static final String APPROVAL_DECIDED = "APPROVAL_DECIDED";
+  public static final String APPROVAL_CANCELLED = "APPROVAL_CANCELLED";
+  public static final String APPROVAL_EXPIRED = "APPROVAL_EXPIRED";
 
   private AuditActions() {
     // Constants holder.

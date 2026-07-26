@@ -87,6 +87,7 @@ public class IncidentController {
                 2,
                 "errorType",
                 "DeploymentRegression"));
+    service.addDemoEvidence(requireOrg(user), i.getId(), user.userId());
     return IncidentService.IncidentView.from(i);
   }
 

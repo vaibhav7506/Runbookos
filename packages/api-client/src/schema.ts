@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/api/runbooks/{id}/versions/{versionId}/steps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["replaceSteps"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/policies/{policyId}/rules/{risk}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/webhooks/{organizationId}/{source}": {
         parameters: {
             query?: never;
@@ -20,6 +52,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/runbooks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list"];
+        put?: never;
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runbooks/{id}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["newDraft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runbooks/{id}/versions/{versionId}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runbooks/{id}/versions/{versionId}/policy-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["preview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/organizations": {
         parameters: {
             query?: never;
@@ -29,7 +125,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["create"];
+        post: operations["create_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -62,6 +158,38 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["callback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/internal/workflows/approvals/decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["decide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/incidents/{incidentId}/analyses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_1"];
+        put?: never;
+        post: operations["analyze"];
         delete?: never;
         options?: never;
         head?: never;
@@ -141,7 +269,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["create_1"];
+        post: operations["create_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -244,6 +372,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/approvals/{id}/decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["decide_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/approvals/authorize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["authorize"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["providers"];
+        put?: never;
+        post: operations["configure"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runbooks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/policies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/incidents": {
         parameters: {
             query?: never;
@@ -267,7 +475,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["detail"];
+        get: operations["detail_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -340,10 +548,169 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/approvals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["inbox"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/approvals/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detail_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/providers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["disable"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        StepRequest: {
+            stepKey: string;
+            name: string;
+            description?: string;
+            /** Format: int32 */
+            sequenceNumber?: number;
+            /** @enum {string} */
+            stepType: "HTTP_REQUEST" | "N8N_WORKFLOW" | "GITHUB_ACTION" | "NOTIFICATION" | "MANUAL_TASK" | "WAIT" | "CONDITION" | "AI_RECOMMENDATION";
+            /** @enum {string} */
+            riskClassification: "READ_ONLY" | "REVERSIBLE" | "HIGH_RISK" | "PROHIBITED";
+            /** @enum {string} */
+            requiredRole: "OWNER" | "ADMIN" | "RESPONDER" | "VIEWER" | "AUDITOR";
+            /** Format: int32 */
+            timeoutSeconds?: number;
+            /** Format: int32 */
+            maxRetries?: number;
+            rollbackInformation?: string;
+            allowedEnvironments: ("DEVELOPMENT" | "STAGING" | "PRODUCTION")[];
+            configuration?: {
+                [key: string]: unknown;
+            };
+        };
+        StepsRequest: {
+            steps: components["schemas"]["StepRequest"][];
+        };
+        RunbookDetail: {
+            runbook?: components["schemas"]["RunbookSummary"];
+            selectedVersion?: components["schemas"]["VersionView"];
+            steps?: components["schemas"]["RunbookStepView"][];
+            versions?: components["schemas"]["VersionView"][];
+        };
+        RunbookStepView: {
+            /** Format: uuid */
+            id?: string;
+            stepKey?: string;
+            name?: string;
+            description?: string;
+            /** Format: int32 */
+            sequenceNumber?: number;
+            /** @enum {string} */
+            stepType?: "HTTP_REQUEST" | "N8N_WORKFLOW" | "GITHUB_ACTION" | "NOTIFICATION" | "MANUAL_TASK" | "WAIT" | "CONDITION" | "AI_RECOMMENDATION";
+            /** @enum {string} */
+            riskClassification?: "READ_ONLY" | "REVERSIBLE" | "HIGH_RISK" | "PROHIBITED";
+            /** @enum {string} */
+            requiredRole?: "OWNER" | "ADMIN" | "RESPONDER" | "VIEWER" | "AUDITOR";
+            /** Format: int32 */
+            timeoutSeconds?: number;
+            /** Format: int32 */
+            maxRetries?: number;
+            rollbackInformation?: string;
+            allowedEnvironments?: string[];
+            configuration?: {
+                [key: string]: unknown;
+            };
+        };
+        RunbookSummary: {
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            description?: string;
+            /** Format: int32 */
+            latestVersion?: number;
+            /** @enum {string} */
+            latestStatus?: "DRAFT" | "PUBLISHED" | "SUPERSEDED";
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        VersionView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: int32 */
+            versionNumber?: number;
+            /** @enum {string} */
+            status?: "DRAFT" | "PUBLISHED" | "SUPERSEDED";
+            changeSummary?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            publishedAt?: string;
+        };
+        RuleRequest: {
+            /** @enum {string} */
+            decision: "ALLOW" | "REQUIRE_APPROVAL" | "REQUIRE_ELEVATED_APPROVAL" | "DENY";
+            /** Format: int32 */
+            requiredApprovals?: number;
+            approverRoles: ("OWNER" | "ADMIN" | "RESPONDER" | "VIEWER" | "AUDITOR")[];
+            typedConfirmationRequired?: boolean;
+            /** Format: int32 */
+            expirationMinutes?: number;
+        };
+        PolicyView: {
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            /** @enum {string} */
+            environment?: "DEVELOPMENT" | "STAGING" | "PRODUCTION";
+            enabled?: boolean;
+            rules?: components["schemas"]["RuleView"][];
+        };
+        RuleView: {
+            /** @enum {string} */
+            risk?: "READ_ONLY" | "REVERSIBLE" | "HIGH_RISK" | "PROHIBITED";
+            /** @enum {string} */
+            decision?: "ALLOW" | "REQUIRE_APPROVAL" | "REQUIRE_ELEVATED_APPROVAL" | "DENY";
+            /** Format: int32 */
+            requiredApprovals?: number;
+            approverRoles?: ("OWNER" | "ADMIN" | "RESPONDER" | "VIEWER" | "AUDITOR")[];
+            typedConfirmationRequired?: boolean;
+            /** Format: int32 */
+            expirationMinutes?: number;
+        };
         WebhookResponse: {
             /** Format: uuid */
             incidentId?: string;
@@ -351,6 +718,37 @@ export interface components {
             status?: "DETECTED" | "TRIAGED" | "INVESTIGATING" | "AWAITING_APPROVAL" | "MITIGATING" | "MONITORING" | "RESOLVED" | "CLOSED" | "CANCELLED";
             /** Format: int32 */
             signalCount?: number;
+        };
+        CreateRequest: {
+            name: string;
+            description?: string;
+        };
+        NewVersionRequest: {
+            changeSummary?: string;
+        };
+        EnvironmentRequest: {
+            /** @enum {string} */
+            environment: "DEVELOPMENT" | "STAGING" | "PRODUCTION";
+        };
+        DecisionResult: {
+            /** Format: uuid */
+            policyId?: string;
+            /** @enum {string} */
+            decision?: "ALLOW" | "REQUIRE_APPROVAL" | "REQUIRE_ELEVATED_APPROVAL" | "DENY";
+            reason?: string;
+            /** Format: int32 */
+            requiredApprovals?: number;
+            approverRoles?: ("OWNER" | "ADMIN" | "RESPONDER" | "VIEWER" | "AUDITOR")[];
+            typedConfirmationRequired?: boolean;
+            /** Format: int32 */
+            expirationMinutes?: number;
+        };
+        PolicyPreview: {
+            stepKey?: string;
+            name?: string;
+            /** @enum {string} */
+            risk?: "READ_ONLY" | "REVERSIBLE" | "HIGH_RISK" | "PROHIBITED";
+            policy?: components["schemas"]["DecisionResult"];
         };
         CreateOrganizationRequest: {
             name: string;
@@ -368,6 +766,76 @@ export interface components {
             accessToken?: string;
             /** Format: uuid */
             organizationId?: string;
+        };
+        ApprovalView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            incidentId?: string;
+            /** Format: uuid */
+            executionId?: string;
+            /** Format: uuid */
+            runbookVersionId?: string;
+            stepKey?: string;
+            actionName?: string;
+            /** @enum {string} */
+            environment?: "DEVELOPMENT" | "STAGING" | "PRODUCTION";
+            /** @enum {string} */
+            riskClassification?: "READ_ONLY" | "REVERSIBLE" | "HIGH_RISK" | "PROHIBITED";
+            /** @enum {string} */
+            policyDecision?: "ALLOW" | "REQUIRE_APPROVAL" | "REQUIRE_ELEVATED_APPROVAL" | "DENY";
+            policyReason?: string;
+            /** @enum {string} */
+            status?: "PENDING" | "APPROVED" | "DENIED" | "EXPIRED" | "CANCELLED";
+            /** Format: int32 */
+            requiredApprovals?: number;
+            confirmationPhrase?: string;
+            /** Format: uuid */
+            requestedBy?: string;
+            /** Format: date-time */
+            requestedAt?: string;
+            /** Format: date-time */
+            expiresAt?: string;
+            /** Format: date-time */
+            resolvedAt?: string;
+            cancellationReason?: string;
+            decisions?: components["schemas"]["DecisionView"][];
+        };
+        DecisionView: {
+            /** Format: uuid */
+            approverUserId?: string;
+            /** @enum {string} */
+            decision?: "APPROVE" | "DENY";
+            reason?: string;
+            /** Format: date-time */
+            decidedAt?: string;
+        };
+        AnalysisView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            incidentId?: string;
+            /** @enum {string} */
+            provider?: "DEMO" | "OPENAI" | "ANTHROPIC" | "GEMINI" | "GROQ" | "OPENAI_COMPATIBLE";
+            model?: string;
+            /** Format: int32 */
+            promptVersion?: number;
+            output?: {
+                [key: string]: unknown;
+            };
+            quality?: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            latencyMs?: number;
+            /** Format: int32 */
+            inputTokens?: number;
+            /** Format: int32 */
+            outputTokens?: number;
+            estimatedCostUsd?: number;
+            fallbackReason?: string;
+            /** Format: date-time */
+            createdAt?: string;
         };
         TransitionRequest: {
             /** @enum {string} */
@@ -473,6 +941,72 @@ export interface components {
             email: string;
             password: string;
         };
+        DecisionRequest: {
+            /** @enum {string} */
+            decision: "APPROVE" | "DENY";
+            reason?: string;
+            confirmationPhrase?: string;
+        };
+        AuthorizationRequest: {
+            /** Format: uuid */
+            incidentId?: string;
+            /** Format: uuid */
+            executionId?: string;
+            /** Format: uuid */
+            runbookVersionId?: string;
+            stepKey: string;
+            actionName: string;
+            /** @enum {string} */
+            environment: "DEVELOPMENT" | "STAGING" | "PRODUCTION";
+            /** @enum {string} */
+            riskClassification: "READ_ONLY" | "REVERSIBLE" | "HIGH_RISK" | "PROHIBITED";
+            /** @enum {string} */
+            requiredRole: "OWNER" | "ADMIN" | "RESPONDER" | "VIEWER" | "AUDITOR";
+        };
+        AuthorizationResult: {
+            policy?: components["schemas"]["DecisionResult"];
+            approval?: components["schemas"]["ApprovalView"];
+            executable?: boolean;
+        };
+        ProviderRequest: {
+            /** @enum {string} */
+            provider: "DEMO" | "OPENAI" | "ANTHROPIC" | "GEMINI" | "GROQ" | "OPENAI_COMPATIBLE";
+            model: string;
+            baseUrl?: string;
+            apiKey: string;
+            /** Format: int32 */
+            priority?: number;
+            /** Format: int32 */
+            timeoutSeconds?: number;
+            /** Format: int32 */
+            maxRetries?: number;
+            /** Format: int32 */
+            inputTokenBudget?: number;
+            /** Format: int32 */
+            outputTokenBudget?: number;
+            costBudgetUsd?: number;
+        };
+        ProviderConfigView: {
+            /** Format: uuid */
+            id?: string;
+            /** @enum {string} */
+            provider?: "DEMO" | "OPENAI" | "ANTHROPIC" | "GEMINI" | "GROQ" | "OPENAI_COMPATIBLE";
+            model?: string;
+            baseUrl?: string;
+            keyFingerprint?: string;
+            /** Format: int32 */
+            priority?: number;
+            enabled?: boolean;
+            /** Format: int32 */
+            timeoutSeconds?: number;
+            /** Format: int32 */
+            maxRetries?: number;
+            /** Format: int32 */
+            inputTokenBudget?: number;
+            /** Format: int32 */
+            outputTokenBudget?: number;
+            costBudgetUsd?: number;
+        };
         IncidentPage: {
             items?: components["schemas"]["IncidentView"][];
             nextCursor?: string;
@@ -568,6 +1102,60 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    replaceSteps: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                versionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StepsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RunbookDetail"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policyId: string;
+                risk: "READ_ONLY" | "REVERSIBLE" | "HIGH_RISK" | "PROHIBITED";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PolicyView"];
+                };
+            };
+        };
+    };
     receive: {
         parameters: {
             query?: never;
@@ -601,7 +1189,131 @@ export interface operations {
             };
         };
     };
+    list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RunbookSummary"][];
+                };
+            };
+        };
+    };
     create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RunbookDetail"];
+                };
+            };
+        };
+    };
+    newDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewVersionRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RunbookDetail"];
+                };
+            };
+        };
+    };
+    publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                versionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnvironmentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RunbookDetail"];
+                };
+            };
+        };
+    };
+    preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                versionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnvironmentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PolicyPreview"][];
+                };
+            };
+        };
+    };
+    create_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -671,6 +1383,78 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    decide: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Internal-Timestamp": string;
+                "X-Internal-Nonce": string;
+                "X-Internal-Signature": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": string;
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApprovalView"];
+                };
+            };
+        };
+    };
+    list_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                incidentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AnalysisView"][];
+                };
+            };
+        };
+    };
+    analyze: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                incidentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AnalysisView"];
+                };
             };
         };
     };
@@ -772,7 +1556,7 @@ export interface operations {
             };
         };
     };
-    create_1: {
+    create_2: {
         parameters: {
             query?: never;
             header: {
@@ -929,6 +1713,144 @@ export interface operations {
             };
         };
     };
+    decide_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApprovalView"];
+                };
+            };
+        };
+    };
+    authorize: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuthorizationRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthorizationResult"];
+                };
+            };
+        };
+    };
+    providers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProviderConfigView"][];
+                };
+            };
+        };
+    };
+    configure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProviderRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProviderConfigView"];
+                };
+            };
+        };
+    };
+    detail: {
+        parameters: {
+            query?: {
+                versionId?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RunbookDetail"];
+                };
+            };
+        };
+    };
+    list_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PolicyView"][];
+                };
+            };
+        };
+    };
     search: {
         parameters: {
             query?: {
@@ -956,7 +1878,7 @@ export interface operations {
             };
         };
     };
-    detail: {
+    detail_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1059,6 +1981,70 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["CurrentUserResponse"];
                 };
+            };
+        };
+    };
+    inbox: {
+        parameters: {
+            query?: {
+                status?: "PENDING" | "APPROVED" | "DENIED" | "EXPIRED" | "CANCELLED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApprovalView"][];
+                };
+            };
+        };
+    };
+    detail_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApprovalView"];
+                };
+            };
+        };
+    };
+    disable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

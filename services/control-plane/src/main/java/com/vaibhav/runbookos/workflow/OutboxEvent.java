@@ -105,6 +105,10 @@ public class OutboxEvent {
     return aggregateId;
   }
 
+  public String getAggregateType() {
+    return aggregateType;
+  }
+
   public String getEventType() {
     return eventType;
   }

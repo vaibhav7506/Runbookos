@@ -6,6 +6,14 @@ spring:
   flyway:
     enabled: true
 
+runbookos:
+  security:
+    jwt-secret: test-jwt-secret-that-is-at-least-thirty-two-bytes-long
+    encryption-key: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+    refresh-cookie-secure: false
+  n8n:
+    signing-secret: test-internal-hmac-secret-at-least-32-bytes
+
 logging:
   level:
     root: WARN

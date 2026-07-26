@@ -1,1 +1,41 @@
-{"name":"RunbookOS — Send Slack Notification v1","active":false,"versionId":"cc66246d-605b-4dcc-8916-ebf868636c78","nodes":[{"id":"trigger","name":"Receive Slack Request","type":"n8n-nodes-base.executeWorkflowTrigger","typeVersion":1.1,"position":[0,0],"parameters":{}},{"id":"result","name":"Return Simulated Notification","type":"n8n-nodes-base.set","typeVersion":3.4,"position":[260,0],"parameters":{"assignments":{"assignments":[{"id":"status","name":"status","type":"string","value":"simulated_in_demo_mode"}]}}}],"connections":{"Receive Slack Request":{"main":[[{"node":"Return Simulated Notification","type":"main","index":0}]]}},"settings":{"executionOrder":"v1","executionTimeout":60}}
+{
+  "name": "RunbookOS — Send Slack Notification v1",
+  "id": "RbOsSlackNotify01",
+  "active": false,
+  "versionId": "cc66246d-605b-4dcc-8916-ebf868636c78",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Receive Slack Request",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "parameters": {}
+    },
+    {
+      "id": "result",
+      "name": "Return Simulated Notification",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [260, 0],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "status",
+              "name": "status",
+              "type": "string",
+              "value": "simulated_in_demo_mode"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Receive Slack Request": {
+      "main": [[{"node": "Return Simulated Notification", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {"executionOrder": "v1", "executionTimeout": 60}
+}

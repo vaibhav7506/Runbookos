@@ -1,5 +1,6 @@
 package com.vaibhav.runbookos.incident;
 
+import com.vaibhav.runbookos.approval.ApprovalService;
 import com.vaibhav.runbookos.audit.*;
 import com.vaibhav.runbookos.common.TimeProvider;
 import com.vaibhav.runbookos.exception.ResourceNotFoundException;
@@ -24,6 +25,7 @@ public class IncidentService {
   private final TenantAccessService access;
   private final AuditService audit;
   private final TimeProvider time;
+  private final ApprovalService approvals;
 
   public IncidentService(
       IncidentRepository incidents,
@@ -33,7 +35,8 @@ public class IncidentService {
       IncidentAssignmentRepository assignments,
       TenantAccessService access,
       AuditService audit,
-      TimeProvider time) {
+      TimeProvider time,
+      ApprovalService approvals) {
     this.incidents = incidents;
     this.signals = signals;
     this.evidence = evidence;
@@ -42,6 +45,7 @@ public class IncidentService {
     this.access = access;
     this.audit = audit;
     this.time = time;
+    this.approvals = approvals;
   }
 
   @Transactional
@@ -139,6 +143,7 @@ public class IncidentService {
     Incident value = require(org, id);
     IncidentStatus from = value.getStatus();
     value.transition(target, time.nowTruncated());
+    approvals.cancelForIncident(org, id, "Incident state changed from " + from + " to " + target);
     audit.record(
         AuditRecord.builder(AuditActions.INCIDENT_TRANSITIONED, "incident")
             .organization(org)
@@ -170,6 +175,41 @@ public class IncidentService {
         comments.save(IncidentComment.create(org, id, user, body.trim(), time.nowTruncated()));
     audit.recordSuccess(AuditActions.INCIDENT_COMMENTED, "incident", org, user, id);
     return comment;
+  }
+
+  @Transactional
+  public void addDemoEvidence(UUID org, UUID incidentId, UUID actor) {
+    access.require(org, actor, Role.OWNER, Role.ADMIN, Role.RESPONDER);
+    require(org, incidentId);
+    Instant now = time.nowTruncated();
+    evidence.save(
+        IncidentEvidence.create(
+            org,
+            incidentId,
+            "DEPLOYMENT",
+            "checkout-api deployment 2026.07.26.3",
+            Map.of(
+                "deployedAt",
+                now.minusSeconds(420).toString(),
+                "commit",
+                "7f4a8d2",
+                "errorRateBefore",
+                0.3,
+                "errorRateAfter",
+                8.7,
+                "authorization",
+                "Bearer demo-value-that-must-never-reach-a-model"),
+            "DEMO",
+            now));
+    evidence.save(
+        IncidentEvidence.create(
+            org,
+            incidentId,
+            "SERVICE_METRIC",
+            "Checkout 5xx rate",
+            Map.of("window", "10m", "baselinePercent", 0.3, "currentPercent", 8.7),
+            "DEMO",
+            now.plusMillis(1)));
   }
 
   @Transactional(readOnly = true)

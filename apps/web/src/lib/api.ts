@@ -9,6 +9,17 @@ import type {
   IncidentDetail,
   IncidentPage,
   IncidentView,
+  AnalysisView,
+  ProviderConfigView,
+  ProviderRequest,
+  RunbookSummary,
+  RunbookDetail,
+  StepsRequest,
+  PolicyView,
+  RuleRequest,
+  ApprovalView,
+  DecisionRequest,
+  PolicyPreview,
 } from "@runbookos/api-client";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
@@ -119,6 +130,56 @@ export const api = {
   execution: (id: string) => request<ExecutionTimeline>(`/api/executions/${id}`),
   retryExecution: (id: string) =>
     request<ExecutionView>(`/api/executions/${id}/retry`, { method: "POST" }),
+  analyses: (incidentId: string) =>
+    request<AnalysisView[]>(`/api/incidents/${incidentId}/analyses`),
+  analyze: (incidentId: string) =>
+    request<AnalysisView>(`/api/incidents/${incidentId}/analyses`, { method: "POST" }),
+  aiProviders: () => request<ProviderConfigView[]>("/api/ai/providers"),
+  configureAiProvider: (value: ProviderRequest) =>
+    request<ProviderConfigView>("/api/ai/providers", {
+      method: "POST",
+      body: JSON.stringify(value),
+    }),
+  disableAiProvider: (id: string) => request<void>(`/api/ai/providers/${id}`, { method: "DELETE" }),
+  runbooks: () => request<RunbookSummary[]>("/api/runbooks"),
+  runbook: (id: string, versionId?: string) =>
+    request<RunbookDetail>(
+      `/api/runbooks/${id}${versionId ? `?versionId=${encodeURIComponent(versionId)}` : ""}`
+    ),
+  createRunbook: (name: string, description: string) =>
+    request<RunbookDetail>("/api/runbooks", {
+      method: "POST",
+      body: JSON.stringify({ name, description }),
+    }),
+  replaceRunbookSteps: (id: string, versionId: string, value: StepsRequest) =>
+    request<RunbookDetail>(`/api/runbooks/${id}/versions/${versionId}/steps`, {
+      method: "PUT",
+      body: JSON.stringify(value),
+    }),
+  previewRunbook: (id: string, versionId: string, environment: string) =>
+    request<PolicyPreview[]>(`/api/runbooks/${id}/versions/${versionId}/policy-preview`, {
+      method: "POST",
+      body: JSON.stringify({ environment }),
+    }),
+  publishRunbook: (id: string, versionId: string, environment: string) =>
+    request<RunbookDetail>(`/api/runbooks/${id}/versions/${versionId}/publish`, {
+      method: "POST",
+      body: JSON.stringify({ environment }),
+    }),
+  policies: () => request<PolicyView[]>("/api/policies"),
+  updatePolicyRule: (policyId: string, risk: string, value: RuleRequest) =>
+    request<PolicyView>(`/api/policies/${policyId}/rules/${risk}`, {
+      method: "PUT",
+      body: JSON.stringify(value),
+    }),
+  approvals: (status?: string) =>
+    request<ApprovalView[]>(`/api/approvals${status ? `?status=${status}` : ""}`),
+  approval: (id: string) => request<ApprovalView>(`/api/approvals/${id}`),
+  decideApproval: (id: string, value: DecisionRequest) =>
+    request<ApprovalView>(`/api/approvals/${id}/decisions`, {
+      method: "POST",
+      body: JSON.stringify(value),
+    }),
 };
 
 export function authorizedStream(path: string, signal: AbortSignal) {

@@ -62,6 +62,10 @@ public class OutboxProcessor {
   }
 
   private void dispatch(OutboxEvent event) throws Exception {
+    if ("approval".equals(event.getAggregateType())) {
+      dispatchApproval(event);
+      return;
+    }
     Execution execution = executions.findById(event.getAggregateId()).orElseThrow();
     String executionToken =
         tokens.issue(
@@ -94,6 +98,29 @@ public class OutboxProcessor {
         .toBodilessEntity();
   }
 
+  private void dispatchApproval(OutboxEvent event) throws Exception {
+    ApprovalDispatchRequest request =
+        new ApprovalDispatchRequest(
+            event.getId(),
+            event.getAggregateId(),
+            event.getOrganizationId(),
+            event.getEventType(),
+            event.getPayload());
+    String body = mapper.writeValueAsString(request);
+    String timestamp = Long.toString(time.now().getEpochSecond());
+    String nonce = UUID.randomUUID().toString();
+    client
+        .post()
+        .uri("/webhook/runbookos-approval")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("X-Internal-Timestamp", timestamp)
+        .header("X-Internal-Nonce", nonce)
+        .header("X-Internal-Signature", signer.sign(timestamp + "." + nonce + "." + body))
+        .body(body)
+        .retrieve()
+        .toBodilessEntity();
+  }
+
   public record DispatchRequest(
       UUID dispatchId,
       UUID executionId,
@@ -101,6 +128,13 @@ public class OutboxProcessor {
       String workflowKey,
       int workflowVersion,
       String executionToken,
+      String eventType,
+      Map<String, Object> payload) {}
+
+  public record ApprovalDispatchRequest(
+      UUID dispatchId,
+      UUID approvalId,
+      UUID organizationId,
       String eventType,
       Map<String, Object> payload) {}
 }

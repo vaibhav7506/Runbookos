@@ -197,3 +197,35 @@ graph TB
 
 n8n success is never authorization proof. PostgreSQL-backed Java state and policy checks remain
 authoritative.
+
+## Implemented Phase 5 Analysis Boundary
+
+1. The tenant-scoped incident and immutable evidence records are loaded.
+2. Sensitive keys, credential-shaped strings, and embedded prompt instructions are removed.
+3. A versioned advisory-only prompt contains bounded evidence IDs and no executable capability.
+4. Demo Mode uses the deterministic local analyzer; configured providers are attempted in priority
+   order with timeouts, retries, persisted circuit state, token ceilings, and cost ceilings.
+5. Structured output is rejected unless citations exist, evidence IDs are real, uncited claims are
+   hypotheses, and deterministic quality checks pass.
+6. Only validated output and non-secret provider, prompt, usage, and quality metadata are persisted.
+
+Model output never contains an execution token and never calls the execution service.
+
+## Implemented Phase 6 Governance Boundary
+
+Runbook drafts are mutable, but publication creates an immutable reviewed version. Each step
+declares its type, risk, minimum role, timeout, retries, rollback information, and allowed
+environments.
+
+The Java policy engine remains the authorization boundary:
+
+- `READ_ONLY` can be allowed after validation.
+- `REVERSIBLE` pauses for a human decision.
+- `HIGH_RISK` requires two distinct owner/admin approvals, prevents self-approval, and requires an
+  exact typed phrase; Demo Mode denies it.
+- `PROHIBITED` is always denied and cannot be weakened in the policy editor.
+
+Policy reasons and approval decisions are persisted and audited. Pending approvals expire and are
+cancelled when their incident changes state. In-app, Slack, and email delivery use the
+transactional outbox; signed external decisions still pass timestamp, nonce, tenant-membership,
+role, uniqueness, and policy checks in Spring Boot.

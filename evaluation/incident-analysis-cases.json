@@ -1,0 +1,8 @@
+[
+  {"id":"deployment-regression","service":"checkout-api","evidenceKind":"DEPLOYMENT","expectedComponent":"checkout-api","expectedAction":"Compare deployment timing with error-rate onset"},
+  {"id":"expired-credential","service":"billing-sync","evidenceKind":"AUTH_ERROR","expectedComponent":"billing-sync","expectedAction":"Compare deployment timing with error-rate onset"},
+  {"id":"database-timeout","service":"orders-db","evidenceKind":"DATABASE_METRIC","expectedComponent":"orders-db","expectedAction":"Compare deployment timing with error-rate onset"},
+  {"id":"dependency-outage","service":"payments-api","evidenceKind":"DEPENDENCY_STATUS","expectedComponent":"payments-api","expectedAction":"Compare deployment timing with error-rate onset"},
+  {"id":"memory-pressure","service":"catalog-worker","evidenceKind":"RUNTIME_METRIC","expectedComponent":"catalog-worker","expectedAction":"Compare deployment timing with error-rate onset"},
+  {"id":"noisy-duplicate-alerts","service":"notification-worker","evidenceKind":"ALERT_GROUP","expectedComponent":"notification-worker","expectedAction":"Compare deployment timing with error-rate onset"}
+]

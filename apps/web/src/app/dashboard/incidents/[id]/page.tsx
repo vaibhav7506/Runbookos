@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { Button, Skeleton, StatusBadge } from "@/components/ui";
+import { AnalysisPanel } from "@/components/analysis-panel";
 export default function IncidentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -116,6 +117,7 @@ export default function IncidentDetailPage() {
               </div>
             )}
           </Panel>
+          <AnalysisPanel incidentId={id} />
         </main>
         <aside className="space-y-6">
           <Panel title="Incident details">

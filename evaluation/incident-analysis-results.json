@@ -1,0 +1,14 @@
+{
+  "analyzer": "deterministic-v1",
+  "promptVersion": 1,
+  "cases": 6,
+  "passed": 6,
+  "failed": 0,
+  "checks": [
+    "valid evidence references",
+    "hypothesis labeling",
+    "non-empty recommendations",
+    "affected component coverage",
+    "no executable tool payload"
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "name": "RunbookOS — Approval Delivery Gateway v1",
+  "id": "RbOsApprovalV001",
+  "active": false,
+  "versionId": "852da0b2-759e-40d6-9e8f-c40404cb4eb1",
+  "nodes": [
+    {
+      "id": "approval-webhook",
+      "name": "Receive Signed Approval Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "runbookos-approval",
+        "responseMode": "responseNode"
+      }
+    },
+    {
+      "id": "verify-signature",
+      "name": "Verify Backend Signature",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 0],
+      "parameters": {
+        "jsCode": "const crypto=require('crypto');const input=$input.first().json;const headers=input.headers||{};const body=JSON.stringify(input.body||{});const timestamp=headers['x-internal-timestamp'];const nonce=headers['x-internal-nonce'];const supplied=headers['x-internal-signature']||'';const sent=Number(timestamp);if(!Number.isFinite(sent)||Math.abs(Math.floor(Date.now()/1000)-sent)>120)throw new Error('Expired approval dispatch');const expected=crypto.createHmac('sha256',$env.INTERNAL_HMAC_SECRET).update(`${timestamp}.${nonce}.${body}`).digest('hex');if(expected.length!==supplied.length||!crypto.timingSafeEqual(Buffer.from(expected),Buffer.from(supplied)))throw new Error('Invalid approval dispatch signature');return [{json:input.body}];"
+      }
+    },
+    {
+      "id": "slack-delivery",
+      "name": "Deliver Through Slack Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [520, 0],
+      "parameters": {
+        "source": "database",
+        "workflowId": "RbOsSlackNotify01",
+        "mode": "once",
+        "options": {"waitForSubWorkflow": true}
+      }
+    },
+    {
+      "id": "email-delivery",
+      "name": "Deliver Through Email Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [780, 0],
+      "parameters": {
+        "source": "database",
+        "workflowId": "RbOsEmailNotify01",
+        "mode": "once",
+        "options": {"waitForSubWorkflow": true}
+      }
+    },
+    {
+      "id": "respond",
+      "name": "Acknowledge Durable Delivery",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [1040, 0],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"accepted\":true}"
+      }
+    }
+  ],
+  "connections": {
+    "Receive Signed Approval Request": {
+      "main": [[{"node": "Verify Backend Signature", "type": "main", "index": 0}]]
+    },
+    "Verify Backend Signature": {
+      "main": [[{"node": "Deliver Through Slack Workflow", "type": "main", "index": 0}]]
+    },
+    "Deliver Through Slack Workflow": {
+      "main": [[{"node": "Deliver Through Email Workflow", "type": "main", "index": 0}]]
+    },
+    "Deliver Through Email Workflow": {
+      "main": [[{"node": "Acknowledge Durable Delivery", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "executionTimeout": 60
+  }
+}
