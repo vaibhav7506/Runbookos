@@ -22,7 +22,9 @@ public enum Role {
   /** Read-only access to the audit trail and approval records, for compliance review. */
   AUDITOR;
 
-  /** Authority name as seen by Spring Security expressions, e.g. {@code hasAuthority('ROLE_ADMIN')}. */
+  /**
+   * Authority name as seen by Spring Security expressions, e.g. {@code hasAuthority('ROLE_ADMIN')}.
+   */
   public String authority() {
     return "ROLE_" + name();
   }

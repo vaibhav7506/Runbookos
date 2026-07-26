@@ -3,17 +3,24 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Button, Input } from "@/components/ui";
+import { api, ApiError } from "@/lib/api";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    // Authentication will be implemented in Phase 2
-    setTimeout(() => {
+    setError(null);
+    const data = new FormData(e.currentTarget);
+    try {
+      await api.login(String(data.get("email")), String(data.get("password")));
       window.location.href = "/dashboard";
-    }, 800);
+    } catch (reason) {
+      setError(reason instanceof ApiError ? reason.message : "Unable to sign in. Try again.");
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -58,6 +65,7 @@ export default function LoginPage() {
             <Input
               label="Email"
               id="email"
+              name="email"
               type="email"
               autoComplete="email"
               placeholder="you@example.com"
@@ -67,6 +75,7 @@ export default function LoginPage() {
               <Input
                 label="Password"
                 id="password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
                 placeholder="••••••••"
@@ -85,6 +94,11 @@ export default function LoginPage() {
             <Button type="submit" className="mt-2 w-full" loading={isLoading}>
               Sign in
             </Button>
+            {error && (
+              <p role="alert" className="text-sm text-[var(--color-critical)]">
+                {error}
+              </p>
+            )}
           </form>
         </div>
 

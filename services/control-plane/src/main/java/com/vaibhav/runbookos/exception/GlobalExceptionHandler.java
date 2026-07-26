@@ -88,6 +88,11 @@ public class GlobalExceptionHandler {
     return buildResponse("NOT_FOUND", "Resource not found", HttpStatus.NOT_FOUND);
   }
 
+  @ExceptionHandler(DomainException.class)
+  public ResponseEntity<ErrorResponse> handleDomain(DomainException ex) {
+    return buildResponse(ex.getCode(), ex.getMessage(), ex.getStatus());
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex) {
     log.error("Unexpected error [correlationId={}]", getCorrelationId(), ex);

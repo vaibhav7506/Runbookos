@@ -13,8 +13,8 @@ import java.util.UUID;
  * disclosure does not yield usable tokens.
  *
  * <p>Rotation forms a chain via {@link #previousId}: each refresh revokes the presented session and
- * issues a successor. Presenting an already-rotated token means the token leaked, so the whole chain
- * for that user is revoked rather than just the one record.
+ * issues a successor. Presenting an already-rotated token means the token leaked, so the whole
+ * chain for that user is revoked rather than just the one record.
  */
 @Entity
 @Table(name = "refresh_sessions")

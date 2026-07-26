@@ -47,6 +47,8 @@ dependencies {
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-test-autoconfigure")
+    testImplementation("org.springframework.boot:spring-boot-resttestclient")
+    testImplementation("org.springframework.boot:spring-boot-restclient")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation(platform("org.testcontainers:testcontainers-bom:1.20.4"))
     testImplementation("org.testcontainers:junit-jupiter")
@@ -64,11 +66,21 @@ val exportOpenApi by
     tasks.registering(Test::class) {
         description = "Writes the OpenAPI document to build/openapi/openapi.json"
         group = "documentation"
+        testClassesDirs = sourceSets.test.get().output.classesDirs
+        classpath = sourceSets.test.get().runtimeClasspath
         useJUnitPlatform()
         filter { includeTestsMatching("com.vaibhav.runbookos.OpenApiDocumentExportTest") }
         systemProperty("runbookos.openapi.export", "true")
         outputs.file(layout.buildDirectory.file("openapi/openapi.json"))
     }
+
+tasks.register<Copy>("syncApiContract") {
+    description = "Exports Springdoc and updates the generated frontend API contract input"
+    group = "documentation"
+    dependsOn(exportOpenApi)
+    from(layout.buildDirectory.file("openapi/openapi.json"))
+    into(layout.projectDirectory.dir("../../packages/api-client"))
+}
 
 spotless {
     java {
@@ -86,4 +98,8 @@ tasks.withType<Test> {
         exceptionFormat = TestExceptionFormat.FULL
         showStandardStreams = false
     }
+}
+
+tasks.named<Test>("test") {
+    filter { excludeTestsMatching("com.vaibhav.runbookos.OpenApiDocumentExportTest") }
 }

@@ -3,13 +3,15 @@ package com.vaibhav.runbookos.common.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.vaibhav.runbookos.common.dto.HealthResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
@@ -20,6 +22,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 /** Integration test for the /api/health endpoint. */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Testcontainers
+@ActiveProfiles("test")
 class HealthControllerTest {
 
   @Container
@@ -43,12 +46,20 @@ class HealthControllerTest {
     registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
   }
 
-  @Autowired private TestRestTemplate restTemplate;
+  @Value("${local.server.port}")
+  private int port;
+
+  private TestRestTemplate restTemplate;
+
+  @BeforeEach
+  void createClient() {
+    restTemplate = new TestRestTemplate();
+  }
 
   @Test
   void healthEndpointReturnsStructuredResponse() {
     ResponseEntity<HealthResponse> response =
-        restTemplate.getForEntity("/api/health", HealthResponse.class);
+        restTemplate.getForEntity(url("/api/health"), HealthResponse.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().status()).isNotNull();
@@ -60,7 +71,7 @@ class HealthControllerTest {
   @Test
   void healthEndpointIncludesAllComponents() {
     ResponseEntity<HealthResponse> response =
-        restTemplate.getForEntity("/api/health", HealthResponse.class);
+        restTemplate.getForEntity(url("/api/health"), HealthResponse.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().components()).containsKeys("postgresql", "redis", "n8n");
@@ -69,7 +80,7 @@ class HealthControllerTest {
   @Test
   void healthEndpointReturnsCorrelationIdHeader() {
     ResponseEntity<HealthResponse> response =
-        restTemplate.getForEntity("/api/health", HealthResponse.class);
+        restTemplate.getForEntity(url("/api/health"), HealthResponse.class);
 
     assertThat(response.getHeaders().getFirst("X-Correlation-ID")).isNotBlank();
   }
@@ -77,7 +88,7 @@ class HealthControllerTest {
   @Test
   void healthEndpointShowsPostgresUp() {
     ResponseEntity<HealthResponse> response =
-        restTemplate.getForEntity("/api/health", HealthResponse.class);
+        restTemplate.getForEntity(url("/api/health"), HealthResponse.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().components().get("postgresql").status()).isEqualTo("UP");
@@ -86,7 +97,7 @@ class HealthControllerTest {
   @Test
   void healthEndpointShowsRedisUp() {
     ResponseEntity<HealthResponse> response =
-        restTemplate.getForEntity("/api/health", HealthResponse.class);
+        restTemplate.getForEntity(url("/api/health"), HealthResponse.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().components().get("redis").status()).isEqualTo("UP");
@@ -95,8 +106,12 @@ class HealthControllerTest {
   @Test
   void healthEndpointReturnsOkOrServiceUnavailable() {
     ResponseEntity<HealthResponse> response =
-        restTemplate.getForEntity("/api/health", HealthResponse.class);
+        restTemplate.getForEntity(url("/api/health"), HealthResponse.class);
 
     assertThat(response.getStatusCode()).isIn(HttpStatus.OK, HttpStatus.SERVICE_UNAVAILABLE);
+  }
+
+  private String url(String path) {
+    return "http://localhost:" + port + path;
   }
 }

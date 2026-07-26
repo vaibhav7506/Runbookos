@@ -1,6 +1,8 @@
 "use client";
 
 import { useTheme } from "@/components/theme-provider";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 interface TopbarProps {
   onToggleSidebar: () => void;
@@ -8,6 +10,15 @@ interface TopbarProps {
 
 export function Topbar({ onToggleSidebar }: TopbarProps) {
   const { setTheme, resolvedTheme } = useTheme();
+  const currentUser = useQuery({
+    queryKey: ["current-user"],
+    queryFn: api.currentUser,
+    retry: false,
+  });
+  const selected =
+    currentUser.data?.organizations.find(
+      (organization) => organization.id === currentUser.data?.selectedOrganizationId
+    ) ?? currentUser.data?.organizations[0];
 
   return (
     <header className="flex h-[var(--topbar-height)] shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4">
@@ -60,28 +71,30 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
 
       {/* Right section */}
       <div className="flex items-center gap-2">
-        {/* Organization switcher placeholder */}
-        <button
-          className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-md)] px-2.5 py-1.5 text-sm text-[var(--color-primary-text)] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--color-hover)]"
-          aria-label="Switch organization"
-        >
+        <label className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-md)] px-2.5 py-1.5 text-sm text-[var(--color-primary-text)] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--color-hover)]">
           <div className="flex h-5 w-5 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-control)]">
-            <span className="text-[10px] font-bold text-[var(--color-control-text)]">R</span>
+            <span className="text-[10px] font-bold text-[var(--color-control-text)]">
+              {selected?.name.slice(0, 1).toUpperCase() ?? "R"}
+            </span>
           </div>
-          <span className="hidden text-xs font-medium sm:inline">RunbookOS</span>
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.3"
-            strokeLinecap="round"
-            aria-hidden="true"
+          <span className="sr-only">Switch organization</span>
+          <select
+            aria-label="Switch organization"
+            value={selected?.id ?? ""}
+            onChange={async (event) => {
+              await api.switchOrganization(event.target.value);
+              window.location.reload();
+            }}
+            className="max-w-32 bg-transparent text-xs font-medium outline-none sm:max-w-48"
           >
-            <path d="M3 5l3 3 3-3" />
-          </svg>
-        </button>
+            {!selected && <option value="">Workspace</option>}
+            {currentUser.data?.organizations.map((organization) => (
+              <option key={organization.id} value={organization.id}>
+                {organization.name}
+              </option>
+            ))}
+          </select>
+        </label>
 
         {/* Theme toggle */}
         <button
@@ -127,7 +140,7 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
           className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[var(--color-hover)] text-xs font-medium text-[var(--color-secondary-text)] transition-all duration-[var(--duration-fast)] hover:ring-2 hover:ring-[var(--color-border-elevated)]"
           aria-label="User menu"
         >
-          U
+          {currentUser.data?.displayName.slice(0, 1).toUpperCase() ?? "U"}
         </button>
       </div>
     </header>

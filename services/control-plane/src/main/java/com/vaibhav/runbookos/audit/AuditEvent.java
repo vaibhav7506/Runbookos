@@ -67,8 +67,8 @@ public class AuditEvent {
   private String ipAddress;
 
   /**
-   * Free-form, non-sensitive context. Mapped with Hibernate's native JSON support, so no third-party
-   * type library is required. Callers must redact secrets before populating this.
+   * Free-form, non-sensitive context. Mapped with Hibernate's native JSON support, so no
+   * third-party type library is required. Callers must redact secrets before populating this.
    */
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(nullable = false, updatable = false, columnDefinition = "jsonb")

@@ -177,3 +177,23 @@ graph TB
 | REVERSIBLE | Requires at least one authorized approval |
 | HIGH_RISK | Requires elevated approval, typed confirmation, disabled in Demo Mode |
 | PROHIBITED | Never executes |
+
+## Implemented Phase 2–4 Control Flow
+
+1. Users authenticate with short-lived access tokens and rotating server-side refresh sessions.
+   Organization membership is re-read for authorization-sensitive operations.
+2. Signed Sentry, GitHub, custom, or demo signals pass timestamp, nonce, payload-size, JSON
+   validation, and recursive redaction checks before persistence.
+3. A stable fingerprint creates an incident or groups the signal into a recent active incident
+   inside the same organization.
+4. Starting a versioned workflow creates the execution, steps, initial event, and outbox dispatch
+   in one database transaction.
+5. The outbox processor signs a short-lived token containing only the execution, organization,
+   nonce, and allowed action identifiers, then dispatches it to n8n.
+6. n8n validates the signed request and token. Each callback is independently signed and protected
+   by a one-time nonce.
+7. Spring Boot checks every callback action against the original allowlist before changing state.
+   Persisted events are delivered as an SSE snapshot followed by live updates.
+
+n8n success is never authorization proof. PostgreSQL-backed Java state and policy checks remain
+authoritative.

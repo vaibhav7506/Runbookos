@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@runbookos/api-client": ["../../packages/api-client/src/index.ts"]
     }
   },
   "include": [

@@ -35,6 +35,16 @@ public final class AuditActions {
   // Authorization
   public static final String ACCESS_DENIED = "ACCESS_DENIED";
 
+  // Incidents and execution
+  public static final String INCIDENT_CREATED = "INCIDENT_CREATED";
+  public static final String INCIDENT_GROUPED = "INCIDENT_GROUPED";
+  public static final String INCIDENT_TRANSITIONED = "INCIDENT_TRANSITIONED";
+  public static final String INCIDENT_ASSIGNED = "INCIDENT_ASSIGNED";
+  public static final String INCIDENT_COMMENTED = "INCIDENT_COMMENTED";
+  public static final String EXECUTION_CREATED = "EXECUTION_CREATED";
+  public static final String EXECUTION_TRANSITIONED = "EXECUTION_TRANSITIONED";
+  public static final String EXECUTION_RETRIED = "EXECUTION_RETRIED";
+
   private AuditActions() {
     // Constants holder.
   }

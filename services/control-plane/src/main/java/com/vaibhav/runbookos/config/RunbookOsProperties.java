@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import java.time.Duration;
+import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
@@ -47,7 +48,11 @@ public record RunbookOsProperties(@Valid Security security, @Valid N8n n8n, @Val
   /**
    * @param baseUrl root URL of the n8n instance
    */
-  public record N8n(@DefaultValue("http://localhost:5678") @NotBlank String baseUrl) {}
+  public record N8n(
+      @DefaultValue("http://localhost:5678") @NotBlank String baseUrl,
+      @NotBlank String signingSecret,
+      @DefaultValue("30s") Duration tokenTtl,
+      @DefaultValue("10s") Duration requestTimeout) {}
 
   /**
    * @param allowedOrigins exact origins allowed to send credentialed requests; wildcards are not

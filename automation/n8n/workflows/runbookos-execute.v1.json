@@ -1,0 +1,128 @@
+{
+  "name": "RunbookOS — Signed Execution Gateway v1",
+  "active": false,
+  "versionId": "79bcdbbe-8df3-48f3-996b-869126461d83",
+  "nodes": [
+    {
+      "id": "gateway-webhook",
+      "name": "Receive Signed Execution",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "parameters": {"httpMethod": "POST", "path": "runbookos-execute", "responseMode": "responseNode"}
+    },
+    {
+      "id": "verify-token",
+      "name": "Verify Dispatch and Execution Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 0],
+      "parameters": {
+        "jsCode": "const crypto=require('crypto');const input=$input.first().json;const headers=input.headers||{};const body=JSON.stringify(input.body||{});const secret=$env.INTERNAL_HMAC_SECRET;if(!secret||secret.length<32)throw new Error('Internal signing secret is unavailable');const expected=crypto.createHmac('sha256',secret).update(`${headers['x-internal-timestamp']}.${headers['x-internal-nonce']}.${body}`).digest('hex');if(!crypto.timingSafeEqual(Buffer.from(expected),Buffer.from(headers['x-internal-signature']||'')))throw new Error('Invalid dispatch signature');const [payload,signature]=(input.body.executionToken||'').split('.');const tokenExpected=crypto.createHmac('sha256',secret).update(payload||'').digest('hex');if(!signature||!crypto.timingSafeEqual(Buffer.from(tokenExpected),Buffer.from(signature)))throw new Error('Invalid execution token');const claims=JSON.parse(Buffer.from(payload,'base64url').toString());if(claims.exp<=Math.floor(Date.now()/1000))throw new Error('Expired execution token');if(claims.executionId!==input.body.executionId||claims.organizationId!==input.body.organizationId)throw new Error('Execution token scope mismatch');return [{json:{...input.body,claims}}];"
+      }
+    },
+    {
+      "id": "build-start",
+      "name": "Sign Started Callback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 0],
+      "parameters": {
+        "jsCode": "const crypto=require('crypto');const value=$input.first().json;const body=JSON.stringify({executionId:value.executionId,executionStatus:'RUNNING',message:'n8n accepted the authorized execution'});const timestamp=String(Math.floor(Date.now()/1000));const nonce=crypto.randomUUID();const signature=crypto.createHmac('sha256',$env.INTERNAL_HMAC_SECRET).update(`${timestamp}.${nonce}.${body}`).digest('hex');return [{json:{...value,callbackBody:body,callbackTimestamp:timestamp,callbackNonce:nonce,callbackSignature:signature}}];"
+      }
+    },
+    {
+      "id": "post-start",
+      "name": "Report Execution Started",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [780, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CONTROL_PLANE_URL + '/api/internal/workflows/callbacks' }}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [{"name":"X-Execution-Token","value":"={{ $json.executionToken }}"},{"name":"X-Internal-Timestamp","value":"={{ $json.callbackTimestamp }}"},{"name":"X-Internal-Nonce","value":"={{ $json.callbackNonce }}"},{"name":"X-Internal-Signature","value":"={{ $json.callbackSignature }}"}]},
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.callbackBody }}",
+        "options": {"timeout": 10000}
+      }
+    },
+    {
+      "id": "build-steps",
+      "name": "Sign Demo Step Callbacks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1040, 0],
+      "parameters": {
+        "jsCode": "const crypto=require('crypto');const value=$('Verify Dispatch and Execution Token').first().json;return value.claims.allowedActionIds.map(actionId=>{const body=JSON.stringify({executionId:value.executionId,actionId,stepStatus:'SUCCEEDED',message:`${actionId} completed in Demo Mode`,output:{mode:'DEMO',simulated:true}});const timestamp=String(Math.floor(Date.now()/1000));const nonce=crypto.randomUUID();const signature=crypto.createHmac('sha256',$env.INTERNAL_HMAC_SECRET).update(`${timestamp}.${nonce}.${body}`).digest('hex');return {json:{...value,callbackBody:body,callbackTimestamp:timestamp,callbackNonce:nonce,callbackSignature:signature}};});"
+      }
+    },
+    {
+      "id": "post-steps",
+      "name": "Report Demo Steps",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1300, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CONTROL_PLANE_URL + '/api/internal/workflows/callbacks' }}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [{"name":"X-Execution-Token","value":"={{ $json.executionToken }}"},{"name":"X-Internal-Timestamp","value":"={{ $json.callbackTimestamp }}"},{"name":"X-Internal-Nonce","value":"={{ $json.callbackNonce }}"},{"name":"X-Internal-Signature","value":"={{ $json.callbackSignature }}"}]},
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.callbackBody }}",
+        "options": {"timeout": 10000}
+      }
+    },
+    {
+      "id": "build-complete",
+      "name": "Sign Completed Callback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 0],
+      "parameters": {
+        "jsCode": "const crypto=require('crypto');const value=$('Verify Dispatch and Execution Token').first().json;const body=JSON.stringify({executionId:value.executionId,executionStatus:'SUCCEEDED',message:'Demo triage workflow completed'});const timestamp=String(Math.floor(Date.now()/1000));const nonce=crypto.randomUUID();const signature=crypto.createHmac('sha256',$env.INTERNAL_HMAC_SECRET).update(`${timestamp}.${nonce}.${body}`).digest('hex');return [{json:{...value,callbackBody:body,callbackTimestamp:timestamp,callbackNonce:nonce,callbackSignature:signature}}];"
+      }
+    },
+    {
+      "id": "post-complete",
+      "name": "Report Execution Completed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1820, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CONTROL_PLANE_URL + '/api/internal/workflows/callbacks' }}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [{"name":"X-Execution-Token","value":"={{ $json.executionToken }}"},{"name":"X-Internal-Timestamp","value":"={{ $json.callbackTimestamp }}"},{"name":"X-Internal-Nonce","value":"={{ $json.callbackNonce }}"},{"name":"X-Internal-Signature","value":"={{ $json.callbackSignature }}"}]},
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.callbackBody }}",
+        "options": {"timeout": 10000}
+      }
+    },
+    {
+      "id": "respond",
+      "name": "Acknowledge Durable Dispatch",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [2080, 0],
+      "parameters": {"respondWith": "json", "responseBody": "={{ {accepted: true, dispatchId: $json.dispatchId} }}", "options": {"responseCode": 202}}
+    }
+  ],
+  "connections": {
+    "Receive Signed Execution": {"main": [[{"node": "Verify Dispatch and Execution Token", "type": "main", "index": 0}]]},
+    "Verify Dispatch and Execution Token": {"main": [[{"node": "Sign Started Callback", "type": "main", "index": 0}]]},
+    "Sign Started Callback": {"main": [[{"node": "Report Execution Started", "type": "main", "index": 0}]]},
+    "Report Execution Started": {"main": [[{"node": "Sign Demo Step Callbacks", "type": "main", "index": 0}]]},
+    "Sign Demo Step Callbacks": {"main": [[{"node": "Report Demo Steps", "type": "main", "index": 0}]]},
+    "Report Demo Steps": {"main": [[{"node": "Sign Completed Callback", "type": "main", "index": 0}]]},
+    "Sign Completed Callback": {"main": [[{"node": "Report Execution Completed", "type": "main", "index": 0}]]},
+    "Report Execution Completed": {"main": [[{"node": "Acknowledge Durable Dispatch", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1", "saveDataErrorExecution": "all", "saveDataSuccessExecution": "none", "executionTimeout": 300}
+}

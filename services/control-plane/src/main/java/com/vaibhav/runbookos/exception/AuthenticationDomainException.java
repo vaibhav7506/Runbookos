@@ -3,8 +3,9 @@ package com.vaibhav.runbookos.exception;
 import org.springframework.http.HttpStatus;
 
 /**
- * Thrown when credentials are missing, malformed, expired, or rejected. The message is intentionally
- * uniform across "unknown email" and "wrong password" so it cannot be used to enumerate accounts.
+ * Thrown when credentials are missing, malformed, expired, or rejected. The message is
+ * intentionally uniform across "unknown email" and "wrong password" so it cannot be used to
+ * enumerate accounts.
  */
 public class AuthenticationDomainException extends DomainException {
 

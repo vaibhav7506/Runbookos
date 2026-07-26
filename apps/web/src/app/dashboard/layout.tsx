@@ -1,7 +1,12 @@
 "use client";
 
 import { AppShell } from "@/components/shell";
+import { SessionGuard } from "@/components/session-guard";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return <AppShell>{children}</AppShell>;
+  return (
+    <SessionGuard>
+      <AppShell>{children}</AppShell>
+    </SessionGuard>
+  );
 }

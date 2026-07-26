@@ -12,7 +12,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AuditEventRepository extends JpaRepository<AuditEvent, UUID> {
 
   /** Tenant-scoped listing. Every read path for audit data must go through an org-scoped method. */
-  Page<AuditEvent> findByOrganizationIdOrderByOccurredAtDesc(UUID organizationId, Pageable pageable);
+  Page<AuditEvent> findByOrganizationIdOrderByOccurredAtDesc(
+      UUID organizationId, Pageable pageable);
 
   Page<AuditEvent> findByOrganizationIdAndActionOrderByOccurredAtDesc(
       UUID organizationId, String action, Pageable pageable);

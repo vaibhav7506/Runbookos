@@ -21,8 +21,8 @@ import org.springframework.stereotype.Component;
  * reuse under the same key would be catastrophic for GCM, so nonces are never derived from data.
  *
  * <p>The master key is supplied through configuration and never written to the database. {@link
- * #keyId()} is recorded alongside each ciphertext so keys can be rotated without needing to know the
- * plaintext of existing records.
+ * #keyId()} is recorded alongside each ciphertext so keys can be rotated without needing to know
+ * the plaintext of existing records.
  */
 @Component
 public class SecretCipher {
@@ -58,7 +58,9 @@ public class SecretCipher {
     return decoded;
   }
 
-  /** Encrypts UTF-8 plaintext. The returned nonce must be stored and supplied back on decryption. */
+  /**
+   * Encrypts UTF-8 plaintext. The returned nonce must be stored and supplied back on decryption.
+   */
   public EncryptedValue encrypt(String plaintext) {
     byte[] nonce = new byte[NONCE_LENGTH_BYTES];
     random.nextBytes(nonce);

@@ -58,6 +58,9 @@ services:
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
       - WEBHOOK_URL=http://n8n:5678/
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - INTERNAL_HMAC_SECRET=${INTERNAL_HMAC_SECRET:-replace-with-a-strong-random-hmac-secret}
+      - CONTROL_PLANE_URL=http://control-plane:8080
     volumes:
       - n8n_data:/home/node/.n8n
     depends_on:
@@ -83,6 +86,8 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - N8N_BASE_URL=http://n8n:5678
+      - JWT_SECRET=${JWT_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
       - INTERNAL_HMAC_SECRET=${INTERNAL_HMAC_SECRET:-replace-with-a-strong-random-hmac-secret}
     depends_on:
       postgres:

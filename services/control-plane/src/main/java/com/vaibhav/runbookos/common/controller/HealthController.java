@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +34,10 @@ public class HealthController {
       @Value("${runbookos.n8n.base-url:http://localhost:5678}") String n8nBaseUrl) {
     this.dataSource = dataSource;
     this.redisConnectionFactory = redisConnectionFactory;
-    this.restClient = RestClient.create();
+    var requestFactory = new SimpleClientHttpRequestFactory();
+    requestFactory.setConnectTimeout(Duration.ofSeconds(2));
+    requestFactory.setReadTimeout(Duration.ofSeconds(2));
+    this.restClient = RestClient.builder().requestFactory(requestFactory).build();
     this.n8nBaseUrl = n8nBaseUrl;
     this.startTime = Instant.now();
   }

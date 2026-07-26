@@ -16,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Stores and retrieves integration secrets.
  *
- * <p>This is a deliberately one-way door for callers outside the integration layer. {@link
- * #store} and {@link #rotate} accept plaintext and return only a {@link CredentialSummaryResponse}
- * carrying a fingerprint. There is no method that returns a secret to a controller. {@link
- * #revealForUse} is package-private so only integration execution code can reach it.
+ * <p>This is a deliberately one-way door for callers outside the integration layer. {@link #store}
+ * and {@link #rotate} accept plaintext and return only a {@link CredentialSummaryResponse} carrying
+ * a fingerprint. There is no method that returns a secret to a controller. {@link #revealForUse} is
+ * package-private so only integration execution code can reach it.
  */
 @Service
 public class IntegrationCredentialService {
@@ -109,8 +109,7 @@ public class IntegrationCredentialService {
     requireIntegration(organizationId, integrationId);
     credentialRepository
         .findByIntegrationIdAndCredentialKey(integrationId, credentialKey)
-        .orElseThrow(
-            () -> new ResourceNotFoundException("Credential '" + credentialKey + "' is not set"));
+        .orElseThrow(() -> new ResourceNotFoundException("integration credential", credentialKey));
     return store(organizationId, integrationId, credentialKey, plaintext, actor);
   }
 
@@ -131,8 +130,7 @@ public class IntegrationCredentialService {
         credentialRepository
             .findByIntegrationIdAndCredentialKey(integration.getId(), credentialKey)
             .orElseThrow(
-                () ->
-                    new ResourceNotFoundException("Credential '" + credentialKey + "' is not set"));
+                () -> new ResourceNotFoundException("integration credential", credentialKey));
     credential.revoke(timeProvider.nowTruncated());
 
     auditService.record(
@@ -159,15 +157,13 @@ public class IntegrationCredentialService {
             .findByIntegrationIdAndCredentialKey(integration.getId(), credentialKey)
             .filter(reference -> !reference.isRevoked())
             .orElseThrow(
-                () ->
-                    new ResourceNotFoundException(
-                        "Credential '" + credentialKey + "' is not available"));
+                () -> new ResourceNotFoundException("integration credential", credentialKey));
     return secretCipher.decrypt(credential.getCiphertext(), credential.getNonce());
   }
 
   private Integration requireIntegration(UUID organizationId, UUID integrationId) {
     return integrationRepository
         .findByIdAndOrganizationId(integrationId, organizationId)
-        .orElseThrow(() -> new ResourceNotFoundException("Integration not found"));
+        .orElseThrow(() -> new ResourceNotFoundException("integration", integrationId));
   }
 }

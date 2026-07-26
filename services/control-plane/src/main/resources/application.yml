@@ -81,6 +81,9 @@ runbookos:
     password-hash-strength: ${PASSWORD_HASH_STRENGTH:12}
   n8n:
     base-url: ${N8N_BASE_URL:http://localhost:5678}
+    signing-secret: ${INTERNAL_HMAC_SECRET}
+    token-ttl: ${N8N_TOKEN_TTL:30s}
+    request-timeout: ${N8N_REQUEST_TIMEOUT:10s}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
 

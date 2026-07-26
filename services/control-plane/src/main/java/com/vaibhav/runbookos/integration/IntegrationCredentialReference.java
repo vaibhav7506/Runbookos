@@ -31,7 +31,10 @@ public class IntegrationCredentialReference {
   @Column(name = "integration_id", nullable = false, updatable = false)
   private UUID integrationId;
 
-  /** Which secret this is within the integration, for example {@code token} or {@code signing_secret}. */
+  /**
+   * Which secret this is within the integration, for example {@code token} or {@code
+   * signing_secret}.
+   */
   @Column(name = "credential_key", nullable = false, updatable = false, length = 64)
   private String credentialKey;
 

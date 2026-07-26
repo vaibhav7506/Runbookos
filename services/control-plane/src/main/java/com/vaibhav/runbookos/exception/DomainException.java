@@ -3,10 +3,10 @@ package com.vaibhav.runbookos.exception;
 import org.springframework.http.HttpStatus;
 
 /**
- * Base class for errors that are part of the domain contract. Each carries a stable machine-readable
- * code and an HTTP status, so {@link GlobalExceptionHandler} can translate it without a growing
- * chain of instanceof checks. Messages on these exceptions are safe to return to clients; anything
- * sensitive belongs in the log, not here.
+ * Base class for errors that are part of the domain contract. Each carries a stable
+ * machine-readable code and an HTTP status, so {@link GlobalExceptionHandler} can translate it
+ * without a growing chain of instanceof checks. Messages on these exceptions are safe to return to
+ * clients; anything sensitive belongs in the log, not here.
  */
 public abstract class DomainException extends RuntimeException {
 

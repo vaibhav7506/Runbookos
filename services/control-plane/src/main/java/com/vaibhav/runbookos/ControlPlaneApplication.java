@@ -4,9 +4,11 @@ import com.vaibhav.runbookos.config.RunbookOsProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableConfigurationProperties(RunbookOsProperties.class)
+@EnableScheduling
 public class ControlPlaneApplication {
 
   public static void main(String[] args) {

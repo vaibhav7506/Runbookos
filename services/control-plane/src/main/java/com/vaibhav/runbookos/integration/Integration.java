@@ -127,9 +127,8 @@ public class Integration {
   public void markError(String message, Instant at) {
     this.status = IntegrationStatus.ERROR;
     this.lastErrorAt = at;
-    this.lastErrorMessage = message == null || message.length() <= 512
-        ? message
-        : message.substring(0, 512);
+    this.lastErrorMessage =
+        message == null || message.length() <= 512 ? message : message.substring(0, 512);
     this.updatedAt = at;
   }
 
