@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+
 import { QueryProvider } from "@/components/query-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "RunbookOS — Human-Governed AI Incident Response",
@@ -19,23 +20,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        {/* Inline script to prevent flash of wrong theme */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var t = localStorage.getItem('runbookos-theme');
-                  var resolved = t === 'dark' ? 'dark' : t === 'light' ? 'light' :
-                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                  document.documentElement.setAttribute('data-theme', resolved);
-                } catch(e) {}
-              })();
-            `,
-          }}
-        />
-      </head>
       <body className="min-h-screen antialiased">
         <ThemeProvider>
           <QueryProvider>{children}</QueryProvider>

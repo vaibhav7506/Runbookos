@@ -7,6 +7,8 @@ import com.vaibhav.runbookos.security.HmacSigner;
 import io.github.resilience4j.bulkhead.*;
 import io.github.resilience4j.circuitbreaker.*;
 import io.github.resilience4j.retry.*;
+import reactor.util.retry.Retry;
+
 import java.util.*;
 import java.util.function.Supplier;
 import org.slf4j.*;
@@ -68,27 +70,34 @@ public class OutboxProcessor {
         event.delivered(time.nowTruncated());
       } catch (Exception ex) {
         log.warn(
-            "Workflow dispatch failed eventId={} attempt={}", event.getId(), event.getAttempts());
-        event.failed(ex.getMessage(), time.nowTruncated());
+            "Workflow dispatch failed eventId={} attempt={}",
+            event.getId(),
+            event.getAttempts(),
+            ex);
       }
     }
   }
 
-  private void resilientDispatch(OutboxEvent event) {
-    Supplier<Void> operation =
-        () -> {
-          try {
-            dispatch(event);
-            return null;
-          } catch (Exception ex) {
-            throw new IllegalStateException("n8n dispatch unavailable", ex);
-          }
-        };
-    operation = Bulkhead.decorateSupplier(bulkhead, operation);
-    operation = CircuitBreaker.decorateSupplier(circuitBreaker, operation);
-    operation = Retry.decorateSupplier(retry, operation);
-    operation.get();
-  }
+private void resilientDispatch(OutboxEvent event) {
+  Supplier<Void> operation =
+      () -> {
+        try {
+          dispatch(event);
+          return null;
+        } catch (RuntimeException ex) {
+          // Preserve ResourceAccessException and other runtime exception types
+          // so Resilience4j can apply the configured retry rules.
+          throw ex;
+        } catch (Exception ex) {
+          throw new IllegalStateException("n8n dispatch unavailable", ex);
+        }
+      };
+
+  operation = Bulkhead.decorateSupplier(bulkhead, operation);
+  operation = CircuitBreaker.decorateSupplier(circuitBreaker, operation);
+  operation = Retry.decorateSupplier(retry, operation);
+  operation.get();
+}
 
   private void dispatch(OutboxEvent event) throws Exception {
     if ("approval".equals(event.getAggregateType())) {

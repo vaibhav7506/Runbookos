@@ -101,12 +101,15 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
     container_name: runbookos-web
     restart: unless-stopped
     ports:
       - "${WEB_PORT:-3000}:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://control-plane:8080
+      # Server-side requests use Docker DNS; browser requests keep the build-time localhost URL.
+      - INTERNAL_API_URL=http://control-plane:8080
     depends_on:
       - control-plane
 

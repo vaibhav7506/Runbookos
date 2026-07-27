@@ -16,7 +16,8 @@ export default function LoginPage() {
     const data = new FormData(e.currentTarget);
     try {
       await api.login(String(data.get("email")), String(data.get("password")));
-      window.location.href = "/dashboard";
+      const user = await api.currentUser();
+      window.location.href = user.organizations.length > 0 ? "/dashboard" : "/onboarding";
     } catch (reason) {
       setError(reason instanceof ApiError ? reason.message : "Unable to sign in. Try again.");
       setIsLoading(false);

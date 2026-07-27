@@ -29,7 +29,7 @@ import type {
   PolicyPreview,
 } from "@runbookos/api-client";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+const LOCAL_API_URL = "http://localhost:8080";
 let accessToken: string | null = null;
 
 export class ApiError extends Error {
@@ -38,9 +38,11 @@ export class ApiError extends Error {
     public readonly code: string,
     message: string,
     public readonly correlationId?: string,
-    public readonly validationErrors: Array<{ field: string; message: string }> = []
+    public readonly validationErrors: Array<{ field: string; message: string }> = [],
+    public readonly networkFailure = false
   ) {
     super(message);
+    this.name = "ApiError";
   }
 }
 
@@ -59,30 +61,103 @@ function token() {
   return accessToken;
 }
 
-async function request<T>(path: string, init: RequestInit = {}, retry = true): Promise<T> {
+type RequestOptions = Omit<RequestInit, "body"> & {
+  body?: BodyInit | object | null;
+  requiresAuth?: boolean;
+};
+
+function apiBaseUrl(): string {
+  const configured =
+    typeof window === "undefined"
+      ? (process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL)
+      : process.env.NEXT_PUBLIC_API_URL;
+  return (configured ?? LOCAL_API_URL).replace(/\/+$/, "");
+}
+
+function isPlainJsonBody(body: RequestOptions["body"]): body is object {
+  if (body === null || typeof body !== "object") return false;
+  if (Array.isArray(body)) return true;
+  return Object.getPrototypeOf(body) === Object.prototype || Object.getPrototypeOf(body) === null;
+}
+
+async function parseResponse(response: Response): Promise<unknown> {
+  if (response.status === 204 || response.status === 205) return undefined;
+  const text = await response.text();
+  if (!text.trim()) return undefined;
+  if (response.headers.get("content-type")?.toLowerCase().includes("json")) {
+    try {
+      return JSON.parse(text) as unknown;
+    } catch {
+      return text;
+    }
+  }
+  return text;
+}
+
+function asErrorResponse(value: unknown): ErrorResponse | null {
+  return value !== null && typeof value === "object" ? (value as ErrorResponse) : null;
+}
+
+export async function request<T>(
+  path: string,
+  options: RequestOptions = {},
+  retry = true
+): Promise<T> {
+  const { body, requiresAuth = true, ...init } = options;
   const headers = new Headers(init.headers);
-  if (init.body) headers.set("Content-Type", "application/json");
-  if (token()) headers.set("Authorization", `Bearer ${token()}`);
-  const response = await fetch(`${baseUrl}${path}`, { ...init, headers, credentials: "include" });
-  if (response.status === 401 && retry && !path.startsWith("/api/auth/")) {
-    const refreshed = await fetch(`${baseUrl}/api/auth/refresh`, {
-      method: "POST",
+  const jsonBody = isPlainJsonBody(body);
+  if (jsonBody && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  const currentToken = requiresAuth ? token() : null;
+  if (currentToken) headers.set("Authorization", `Bearer ${currentToken}`);
+
+  let response: Response;
+  try {
+    response = await fetch(`${apiBaseUrl()}${path}`, {
+      ...init,
+      body: jsonBody ? JSON.stringify(body) : (body as BodyInit | null | undefined),
+      headers,
       credentials: "include",
     });
-    if (refreshed.ok) {
-      const auth = (await refreshed.json()) as AuthResponse;
-      setAccessToken(auth.accessToken);
-      return request<T>(path, init, false);
-    }
-    setAccessToken(null);
-    window.dispatchEvent(new Event("runbookos:session-expired"));
+  } catch {
+    throw new ApiError(
+      0,
+      "BACKEND_UNAVAILABLE",
+      "RunbookOS backend is unavailable. Start the control-plane service and try again.",
+      undefined,
+      [],
+      true
+    );
   }
+
+  if (response.status === 401 && retry && requiresAuth) {
+    try {
+      const auth = await request<AuthResponse>(
+        "/api/auth/refresh",
+        { method: "POST", requiresAuth: false },
+        false
+      );
+      setAccessToken(auth.accessToken);
+      return request<T>(path, options, false);
+    } catch {
+      setAccessToken(null);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("runbookos:session-expired"));
+      }
+    }
+  }
+
+  const parsed = await parseResponse(response);
   if (!response.ok) {
-    const error = (await response.json().catch(() => null)) as ErrorResponse | null;
+    const error = asErrorResponse(parsed);
     throw new ApiError(
       response.status,
       error?.code ?? "REQUEST_FAILED",
-      error?.message ?? "Request failed",
+      error?.message ??
+        (typeof parsed === "string" && parsed.trim()
+          ? parsed
+          : `Request failed (${response.status})`),
       error?.correlationId,
       error?.validationErrors?.map((item) => ({
         field: item.field,
@@ -90,7 +165,7 @@ async function request<T>(path: string, init: RequestInit = {}, retry = true): P
       })) ?? []
     );
   }
-  return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
+  return parsed as T;
 }
 
 export const api = {
@@ -98,7 +173,8 @@ export const api = {
   login: (email: string, password: string) =>
     request<AuthResponse>("/api/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: { email, password },
+      requiresAuth: false,
     }).then((value) => {
       setAccessToken(value.accessToken);
       return value;
@@ -106,7 +182,8 @@ export const api = {
   signup: (email: string, password: string, displayName: string) =>
     request<AuthResponse>("/api/auth/signup", {
       method: "POST",
-      body: JSON.stringify({ email, password, displayName }),
+      body: { email, password, displayName },
+      requiresAuth: false,
     }).then((value) => {
       setAccessToken(value.accessToken);
       return value;
@@ -114,7 +191,7 @@ export const api = {
   createOrganization: (name: string, demoMode: boolean) =>
     request<{ id: string; name: string; slug: string; demoMode: boolean }>("/api/organizations", {
       method: "POST",
-      body: JSON.stringify({ name, demoMode }),
+      body: { name, demoMode },
     }),
   switchOrganization: (id: string) =>
     request<{ accessToken: string; organizationId: string }>(`/api/organizations/${id}/switch`, {
@@ -129,15 +206,15 @@ export const api = {
   transition: (id: string, status: string) =>
     request<IncidentView>(`/api/incidents/${id}/transitions`, {
       method: "POST",
-      body: JSON.stringify({ status }),
+      body: { status },
     }),
   comment: (id: string, body: string) =>
-    request(`/api/incidents/${id}/comments`, { method: "POST", body: JSON.stringify({ body }) }),
+    request(`/api/incidents/${id}/comments`, { method: "POST", body: { body } }),
   createExecution: (incidentId: string) =>
     request<ExecutionView>("/api/executions", {
       method: "POST",
       headers: { "Idempotency-Key": crypto.randomUUID() },
-      body: JSON.stringify({ incidentId, workflowKey: "incident-triage" }),
+      body: { incidentId, workflowKey: "incident-triage" },
     }),
   execution: (id: string) => request<ExecutionTimeline>(`/api/executions/${id}`),
   retryExecution: (id: string) =>
@@ -150,7 +227,7 @@ export const api = {
   configureAiProvider: (value: ProviderRequest) =>
     request<ProviderConfigView>("/api/ai/providers", {
       method: "POST",
-      body: JSON.stringify(value),
+      body: value,
     }),
   disableAiProvider: (id: string) => request<void>(`/api/ai/providers/${id}`, { method: "DELETE" }),
   runbooks: () => request<RunbookSummary[]>("/api/runbooks"),
@@ -161,28 +238,28 @@ export const api = {
   createRunbook: (name: string, description: string) =>
     request<RunbookDetail>("/api/runbooks", {
       method: "POST",
-      body: JSON.stringify({ name, description }),
+      body: { name, description },
     }),
   replaceRunbookSteps: (id: string, versionId: string, value: StepsRequest) =>
     request<RunbookDetail>(`/api/runbooks/${id}/versions/${versionId}/steps`, {
       method: "PUT",
-      body: JSON.stringify(value),
+      body: value,
     }),
   previewRunbook: (id: string, versionId: string, environment: string) =>
     request<PolicyPreview[]>(`/api/runbooks/${id}/versions/${versionId}/policy-preview`, {
       method: "POST",
-      body: JSON.stringify({ environment }),
+      body: { environment },
     }),
   publishRunbook: (id: string, versionId: string, environment: string) =>
     request<RunbookDetail>(`/api/runbooks/${id}/versions/${versionId}/publish`, {
       method: "POST",
-      body: JSON.stringify({ environment }),
+      body: { environment },
     }),
   policies: () => request<PolicyView[]>("/api/policies"),
   updatePolicyRule: (policyId: string, risk: string, value: RuleRequest) =>
     request<PolicyView>(`/api/policies/${policyId}/rules/${risk}`, {
       method: "PUT",
-      body: JSON.stringify(value),
+      body: value,
     }),
   approvals: (status?: string) =>
     request<ApprovalView[]>(`/api/approvals${status ? `?status=${status}` : ""}`),
@@ -190,13 +267,13 @@ export const api = {
   decideApproval: (id: string, value: DecisionRequest) =>
     request<ApprovalView>(`/api/approvals/${id}/decisions`, {
       method: "POST",
-      body: JSON.stringify(value),
+      body: value,
     }),
   integrations: () => request<IntegrationView[]>("/api/integrations"),
   createIntegration: (value: IntegrationSetupRequest) =>
     request<IntegrationView>("/api/integrations", {
       method: "POST",
-      body: JSON.stringify(value),
+      body: value,
     }),
   validateIntegration: (id: string) =>
     request<IntegrationView>(`/api/integrations/${id}/validate`, { method: "POST" }),
@@ -216,8 +293,9 @@ export const api = {
 };
 
 export function authorizedStream(path: string, signal: AbortSignal) {
-  return fetch(`${baseUrl}${path}`, {
-    headers: { Authorization: `Bearer ${token()}` },
+  const currentToken = token();
+  return fetch(`${apiBaseUrl()}${path}`, {
+    headers: currentToken ? { Authorization: `Bearer ${currentToken}` } : undefined,
     credentials: "include",
     signal,
   });

@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
 type Theme = "light" | "dark" | "system";
 
@@ -13,6 +20,7 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "runbookos-theme";
+const THEME_CHANGE_EVENT = "runbookos:theme-change";
 
 function getSystemTheme(): "light" | "dark" {
   if (typeof window === "undefined") return "light";
@@ -27,34 +35,34 @@ function applyThemeToDocument(resolved: "light" | "dark") {
   document.documentElement.setAttribute("data-theme", resolved);
 }
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  // Initialize lazily from localStorage to avoid setState-in-effect
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "system";
-    return (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? "system";
-  });
+function storedTheme(): Theme {
+  const value = localStorage.getItem(STORAGE_KEY);
+  return value === "light" || value === "dark" || value === "system" ? value : "system";
+}
 
+function subscribeToTheme(onChange: () => void) {
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  window.addEventListener("storage", onChange);
+  window.addEventListener(THEME_CHANGE_EVENT, onChange);
+  media.addEventListener("change", onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(THEME_CHANGE_EVENT, onChange);
+    media.removeEventListener("change", onChange);
+  };
+}
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const theme = useSyncExternalStore<Theme>(subscribeToTheme, storedTheme, (): Theme => "system");
   const resolvedTheme = resolveTheme(theme);
 
-  // Apply theme to document on change
   useEffect(() => {
     applyThemeToDocument(resolvedTheme);
   }, [resolvedTheme]);
 
-  // Listen for system theme changes when in "system" mode
-  useEffect(() => {
-    if (theme !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => {
-      applyThemeToDocument(resolveTheme("system"));
-    };
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, [theme]);
-
   const setTheme = useCallback((t: Theme) => {
-    setThemeState(t);
     localStorage.setItem(STORAGE_KEY, t);
+    window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
   }, []);
 
   return (

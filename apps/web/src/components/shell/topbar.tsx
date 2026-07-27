@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { useTheme } from "@/components/theme-provider";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -9,17 +10,32 @@ interface TopbarProps {
   onToggleSidebar: () => void;
 }
 
+const subscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 export function Topbar({ onToggleSidebar }: TopbarProps) {
   const { setTheme, resolvedTheme } = useTheme();
+
+  const mounted = useSyncExternalStore(
+    subscribe,
+    getClientSnapshot,
+    getServerSnapshot
+  );
+
   const currentUser = useQuery({
     queryKey: ["current-user"],
     queryFn: api.currentUser,
     retry: false,
   });
+
   const selected =
     currentUser.data?.organizations.find(
-      (organization) => organization.id === currentUser.data?.selectedOrganizationId
+      (organization) =>
+        organization.id === currentUser.data?.selectedOrganizationId
     ) ?? currentUser.data?.organizations[0];
+
+  // Keep the remaining JSX exactly as it is.
 
   return (
     <header className="flex h-[var(--topbar-height)] shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4">
@@ -56,7 +72,9 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
               {selected?.name.slice(0, 1).toUpperCase() ?? "R"}
             </span>
           </div>
+
           <span className="sr-only">Switch organization</span>
+
           <select
             aria-label="Switch organization"
             value={selected?.id ?? ""}
@@ -67,6 +85,7 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
             className="max-w-32 bg-transparent text-xs font-medium outline-none sm:max-w-48"
           >
             {!selected && <option value="">Workspace</option>}
+
             {currentUser.data?.organizations.map((organization) => (
               <option key={organization.id} value={organization.id}>
                 {organization.name}
@@ -76,43 +95,57 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
         </label>
 
         {/* Theme toggle */}
-        <button
-          onClick={() => {
-            const next = resolvedTheme === "light" ? "dark" : "light";
-            setTheme(next);
-          }}
-          className="cursor-pointer rounded-[var(--radius-md)] p-2 text-[var(--color-secondary-text)] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--color-hover)] hover:text-[var(--color-primary-text)]"
-          aria-label={`Switch to ${resolvedTheme === "light" ? "dark" : "light"} theme`}
-        >
-          {resolvedTheme === "light" ? (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.3"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06" />
-              <circle cx="8" cy="8" r="3" />
-            </svg>
-          ) : (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.3"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <path d="M13.5 8.5a5.5 5.5 0 01-6-6 5.5 5.5 0 106 6z" />
-            </svg>
-          )}
-        </button>
+        {!mounted ? (
+          <button
+            type="button"
+            disabled
+            aria-label="Toggle theme"
+            className="rounded-[var(--radius-md)] p-2 text-[var(--color-secondary-text)]"
+          >
+            <span className="block h-4 w-4" aria-hidden="true" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              const next = resolvedTheme === "light" ? "dark" : "light";
+              setTheme(next);
+            }}
+            className="cursor-pointer rounded-[var(--radius-md)] p-2 text-[var(--color-secondary-text)] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--color-hover)] hover:text-[var(--color-primary-text)]"
+            aria-label={`Switch to ${
+              resolvedTheme === "light" ? "dark" : "light"
+            } theme`}
+          >
+            {resolvedTheme === "light" ? (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06" />
+                <circle cx="8" cy="8" r="3" />
+              </svg>
+            ) : (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <path d="M13.5 8.5a5.5 5.5 0 01-6-6 5.5 5.5 0 106 6z" />
+              </svg>
+            )}
+          </button>
+        )}
 
         {/* User avatar */}
         <button
