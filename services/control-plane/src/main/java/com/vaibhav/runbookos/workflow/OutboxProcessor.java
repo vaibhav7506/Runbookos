@@ -7,8 +7,6 @@ import com.vaibhav.runbookos.security.HmacSigner;
 import io.github.resilience4j.bulkhead.*;
 import io.github.resilience4j.circuitbreaker.*;
 import io.github.resilience4j.retry.*;
-import reactor.util.retry.Retry;
-
 import java.util.*;
 import java.util.function.Supplier;
 import org.slf4j.*;
@@ -19,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
+import reactor.util.retry.Retry;
 import tools.jackson.databind.ObjectMapper;
 
 @Component
@@ -78,26 +77,26 @@ public class OutboxProcessor {
     }
   }
 
-private void resilientDispatch(OutboxEvent event) {
-  Supplier<Void> operation =
-      () -> {
-        try {
-          dispatch(event);
-          return null;
-        } catch (RuntimeException ex) {
-          // Preserve ResourceAccessException and other runtime exception types
-          // so Resilience4j can apply the configured retry rules.
-          throw ex;
-        } catch (Exception ex) {
-          throw new IllegalStateException("n8n dispatch unavailable", ex);
-        }
-      };
+  private void resilientDispatch(OutboxEvent event) {
+    Supplier<Void> operation =
+        () -> {
+          try {
+            dispatch(event);
+            return null;
+          } catch (RuntimeException ex) {
+            // Preserve ResourceAccessException and other runtime exception types
+            // so Resilience4j can apply the configured retry rules.
+            throw ex;
+          } catch (Exception ex) {
+            throw new IllegalStateException("n8n dispatch unavailable", ex);
+          }
+        };
 
-  operation = Bulkhead.decorateSupplier(bulkhead, operation);
-  operation = CircuitBreaker.decorateSupplier(circuitBreaker, operation);
-  operation = Retry.decorateSupplier(retry, operation);
-  operation.get();
-}
+    operation = Bulkhead.decorateSupplier(bulkhead, operation);
+    operation = CircuitBreaker.decorateSupplier(circuitBreaker, operation);
+    operation = Retry.decorateSupplier(retry, operation);
+    operation.get();
+  }
 
   private void dispatch(OutboxEvent event) throws Exception {
     if ("approval".equals(event.getAggregateType())) {

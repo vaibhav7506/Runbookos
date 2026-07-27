@@ -17,11 +17,7 @@ const getServerSnapshot = () => false;
 export function Topbar({ onToggleSidebar }: TopbarProps) {
   const { setTheme, resolvedTheme } = useTheme();
 
-  const mounted = useSyncExternalStore(
-    subscribe,
-    getClientSnapshot,
-    getServerSnapshot
-  );
+  const mounted = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
 
   const currentUser = useQuery({
     queryKey: ["current-user"],
@@ -31,8 +27,7 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
 
   const selected =
     currentUser.data?.organizations.find(
-      (organization) =>
-        organization.id === currentUser.data?.selectedOrganizationId
+      (organization) => organization.id === currentUser.data?.selectedOrganizationId
     ) ?? currentUser.data?.organizations[0];
 
   // Keep the remaining JSX exactly as it is.
@@ -112,9 +107,7 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
               setTheme(next);
             }}
             className="cursor-pointer rounded-[var(--radius-md)] p-2 text-[var(--color-secondary-text)] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--color-hover)] hover:text-[var(--color-primary-text)]"
-            aria-label={`Switch to ${
-              resolvedTheme === "light" ? "dark" : "light"
-            } theme`}
+            aria-label={`Switch to ${resolvedTheme === "light" ? "dark" : "light"} theme`}
           >
             {resolvedTheme === "light" ? (
               <svg
