@@ -1,0 +1,13 @@
+runbookos:
+  security:
+    refresh-cookie-secure: true
+
+management:
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLE_PROBABILITY:0.5}
+
+logging:
+  level:
+    root: INFO
+    com.vaibhav.runbookos: DEBUG

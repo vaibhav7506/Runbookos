@@ -12,4 +12,9 @@ public interface OutboxEventRepository extends JpaRepository<OutboxEvent, UUID> 
   @Query(
       "select o from OutboxEvent o where o.status='PENDING' and o.nextAttemptAt<=:now order by o.createdAt")
   List<OutboxEvent> findReady(@Param("now") Instant now, Pageable pageable);
+
+  List<OutboxEvent> findByOrganizationIdAndStatusOrderByCreatedAtDesc(
+      UUID organizationId, OutboxStatus status, Pageable pageable);
+
+  long countByOrganizationIdAndStatus(UUID organizationId, OutboxStatus status);
 }

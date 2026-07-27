@@ -38,7 +38,7 @@ services:
 
   # ---------- Orchestration ----------
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:2.30.3
     container_name: runbookos-n8n
     restart: unless-stopped
     ports:
@@ -86,8 +86,9 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - N8N_BASE_URL=http://n8n:5678
-      - JWT_SECRET=${JWT_SECRET}
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - JWT_SECRET=${JWT_SECRET:-runbookos-local-jwt-signing-secret-change-before-production-0123456789}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
+      - REFRESH_COOKIE_SECURE=${REFRESH_COOKIE_SECURE:-false}
       - INTERNAL_HMAC_SECRET=${INTERNAL_HMAC_SECRET:-replace-with-a-strong-random-hmac-secret}
     depends_on:
       postgres:
@@ -98,8 +99,8 @@ services:
   # ---------- Frontend ----------
   web:
     build:
-      context: ./apps/web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/web/Dockerfile
     container_name: runbookos-web
     restart: unless-stopped
     ports:

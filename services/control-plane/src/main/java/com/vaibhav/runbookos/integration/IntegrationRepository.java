@@ -19,4 +19,7 @@ public interface IntegrationRepository extends JpaRepository<Integration, UUID> 
   List<Integration> findByOrganizationIdAndKind(UUID organizationId, IntegrationKind kind);
 
   boolean existsByOrganizationIdAndName(UUID organizationId, String name);
+
+  long countByOrganizationIdAndStatusIn(
+      UUID organizationId, java.util.Collection<IntegrationStatus> statuses);
 }

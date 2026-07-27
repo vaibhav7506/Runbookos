@@ -16,6 +16,11 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
+    label: "Getting Started",
+    href: "/dashboard/getting-started",
+    icon: <GuideIcon />,
+  },
+  {
     label: "Overview",
     href: "/dashboard",
     icon: <OverviewIcon />,
@@ -44,6 +49,11 @@ const navItems: NavItem[] = [
     label: "Audit Log",
     href: "/dashboard/audit",
     icon: <AuditIcon />,
+  },
+  {
+    label: "System Health",
+    href: "/dashboard/operations",
+    icon: <HealthIcon />,
   },
 ];
 
@@ -193,6 +203,25 @@ function OverviewIcon() {
   );
 }
 
+function GuideIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 3.5h8.5A2.5 2.5 0 0114 6v8.5H5.5A2.5 2.5 0 013 12V3.5z" />
+      <path d="M6 7h5M6 10h3" />
+    </svg>
+  );
+}
+
 function IncidentsIcon() {
   return (
     <svg
@@ -302,6 +331,24 @@ function SettingsIcon() {
     >
       <circle cx="9" cy="9" r="2.5" />
       <path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.1 3.1l1.4 1.4M13.5 13.5l1.4 1.4M3.1 14.9l1.4-1.4M13.5 4.5l1.4-1.4" />
+    </svg>
+  );
+}
+
+function HealthIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M2 9h3l1.5-4 3 8 1.5-4H16" />
     </svg>
   );
 }

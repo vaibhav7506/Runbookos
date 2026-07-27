@@ -1,6 +1,6 @@
 # RunbookOS — Project Plan
 
-## Current Phase: 6 — Runbooks, Policy Engine, and Human Approval
+## Current Phase: 9 — Product Polish and Complete UX
 
 ## Phase Status
 
@@ -12,10 +12,10 @@
 | 4 | n8n Orchestration and Execution Engine | ✅ Complete |
 | 5 | Evidence-Grounded AI Incident Analysis | ✅ Complete |
 | 6 | Runbooks, Policy Engine, and Human Approval | ✅ Complete |
-| 7 | Integrations and Complete Incident Workflow | ⬜ Next |
-| 8 | Reliability, Security, and Observability | ⬜ Not started |
-| 9 | Product Polish and Complete UX | ⬜ Not started |
-| 10 | Testing, Deployment, Documentation, and Final Audit | ⬜ Not started |
+| 7 | Integrations and Complete Incident Workflow | ✅ Complete |
+| 8 | Reliability, Security, and Observability | ✅ Complete |
+| 9 | Product Polish and Complete UX | ✅ Complete |
+| 10 | Testing, Deployment, Documentation, and Final Audit | ⬜ Next |
 
 ## Phase 2 — Completed
 
@@ -77,6 +77,40 @@
 - Backend-authoritative signed Slack/email workflow callbacks with nonce replay protection
 - Runbook library, detail, step builder, policy preview/editor, and approval inbox/detail UI
 
+## Phase 7 — Completed
+
+- Organization-isolated GitHub, Sentry, Slack, email, Jira, signed webhook, and HTTP health-check integrations
+- Encrypted credentials with redacted responses, explicit permission scopes, validation health, usage history, and credential revocation
+- Live GitHub validation plus transparent no-credential demo adapters for every other connector
+- Three realistic starter runbooks and a deterministic end-to-end demo incident
+- Persisted, printable incident postmortems generated only after resolution
+
+## Phase 8 — Completed
+
+- Resilience4j retries, timeouts, circuit breakers, bulkheads, transactional outbox backpressure, dead-letter inspection, and audited redrive
+- Strict request limits, content-type enforcement, HMAC/replay defenses, rate limits, security headers, and SSRF-safe outbound targets
+- Integrity-chained audit records, archival/indexing migrations, pagination, and organization-isolated operational endpoints
+- Structured correlation logging, OpenTelemetry tracing, Micrometer metrics, Prometheus configuration, and Grafana dashboard
+- Threat model, reliability runbook, dependency scanning, container scanning, resilience tests, and SSRF tests
+
+## Phase 9 — Completed
+
+- Operational overview and health dashboards with incident, approval, execution, integration, AI-cost, and dead-letter signals
+- Three-region incident workspace with a precise response timeline, evidence and analysis drawer, contextual actions, notes, and printable postmortems
+- Command palette, keyboard shortcuts, recent destinations, saved incident filters, copyable deep links, and locale-aware exact times
+- Guided first-run demo, polished landing preview, responsive mobile navigation, dark theme, loading/error/empty states, and reduced-motion support
+- Unsaved-change protection, destructive confirmations, inline action feedback, and responsive approval, digest, and resolution email templates
+
+## Phase 10 — Completed
+
+- Expanded backend coverage for HMAC tamper rejection, optimistic approval locking, provider HTTP boundaries, outbox dead-letter/redrive behavior, policy invariants, authentication, state machines, tenant isolation, and SSRF defenses
+- Added Vitest component, validation, and API-client tests plus Playwright desktop/mobile coverage for registration, onboarding, demo incident creation, grounded analysis, lifecycle transitions, postmortem generation, and WCAG checks
+- Completed CI gates for formatting, compilation, backend/frontend tests, workflow exports, deterministic analysis evaluation, secret/dependency/container scanning, Docker image builds, and browser E2E
+- Added non-root production images, health checks, graceful shutdown, staging/production profiles, queue-mode n8n worker deployment, internal networking, authenticated Redis, TLS reverse proxy, and optional observability profile
+- Added deployment, backup/restore, incident-recovery, security, data-model, workflow-boundary, demo, and final-audit documentation
+- Rebuilt the project README with architecture, quick start, exact VS Code commands, configuration, security, operations, testing, limitations, roadmap, and portfolio guidance
+- Completed the final local audit with healthy containers, zero npm production advisories, valid workflow exports, deterministic analysis evaluation, and passing desktop/mobile browser flows
+
 ## Architectural Decisions
 
 | ID | Decision | Rationale |
@@ -100,8 +134,7 @@
 | Risk | Severity | Mitigation |
 |:--|:--|:--|
 | Workflow exports require import and activation in local n8n | Low | Inactive-by-design exports are repository-validated |
-| Demo workflow uses simulated providers | Expected | Real adapters are Phase 7 |
-| OpenAPI generator audit includes transitive tooling advisories | Medium | Generator is development-only; track compatible upgrades |
+| Non-GitHub external adapters use transparent simulations without credentials | Expected | Configure provider credentials when validating production deployments |
 | External AI output quality varies by model | Medium | Deterministic schema, citation, budget, and quality gates reject unsafe output |
 | Slack/email identity mapping depends on Phase 7 adapters | Low | Signed callbacks still re-check tenant membership and role in Spring Boot |
 
@@ -111,14 +144,19 @@
 |:--|:--|
 | Backend Spotless | ✅ Pass |
 | Backend compile | ✅ Pass |
-| Backend unit and integration tests | ✅ 30/30 pass |
+| Backend unit and integration tests | ✅ 42/42 pass |
 | Clean Flyway migration | ✅ PostgreSQL 16 Testcontainers |
 | Frontend format, lint, and strict type check | ✅ Pass |
+| Frontend component, validation, and API tests | ✅ 7/7 pass |
 | Frontend production build | ✅ Pass |
+| Desktop/mobile Playwright and WCAG flows | ✅ 4/4 pass |
+| npm production dependency audit | ✅ 0 known vulnerabilities |
 | Generated API contract | ✅ Pass |
-| n8n workflow validation | ✅ Pass |
+| n8n workflow validation | ✅ 12 exports pass |
 | Analysis evaluation dataset | ✅ 6/6 pass |
+| Local Docker release stack | ✅ All services healthy |
 
-## Next Phase
+## Project Status
 
-Phase 7 — Integrations and Complete Incident Workflow
+All ten planned phases are complete. Future work is tracked as roadmap scope rather than unfinished
+phase acceptance criteria.

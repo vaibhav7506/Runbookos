@@ -7,6 +7,8 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ApprovalRequestRepository extends JpaRepository<ApprovalRequest, UUID> {
+  long countByOrganizationIdAndStatus(UUID organizationId, ApprovalStatus status);
+
   Optional<ApprovalRequest> findByIdAndOrganizationId(UUID id, UUID organizationId);
 
   List<ApprovalRequest> findByOrganizationIdOrderByRequestedAtDesc(UUID organizationId);

@@ -1,0 +1,14 @@
+.git
+.github
+.idea
+.vscode
+**/node_modules
+**/.next
+**/build
+**/bin
+**/.gradle
+**/*.log
+**/.env
+**/.env.*
+!**/.env.example
+README.md

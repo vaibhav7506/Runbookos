@@ -80,6 +80,7 @@ case "${1:-}" in
     cd "$ROOT/apps/web"
     npm run lint
     npm run type-check
+    npm test
     echo "✓ Frontend checks complete"
     ;;
 

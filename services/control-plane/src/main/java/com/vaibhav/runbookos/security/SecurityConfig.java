@@ -23,7 +23,10 @@ import tools.jackson.databind.ObjectMapper;
 public class SecurityConfig {
   @Bean
   SecurityFilterChain securityFilterChain(
-      HttpSecurity http, JwtAuthenticationFilter filter, ObjectMapper objectMapper)
+      HttpSecurity http,
+      JwtAuthenticationFilter filter,
+      RequestSecurityFilter requestSecurityFilter,
+      ObjectMapper objectMapper)
       throws Exception {
     http.csrf(csrf -> csrf.disable())
         .cors(cors -> {})
@@ -60,7 +63,15 @@ public class SecurityConfig {
                         (request, response, ex) ->
                             writeError(
                                 objectMapper, response, 403, "ACCESS_DENIED", "Access is denied")))
-        .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+        .headers(
+            headers ->
+                headers
+                    .frameOptions(frame -> frame.deny())
+                    .contentTypeOptions(content -> {})
+                    .httpStrictTransportSecurity(
+                        hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000)))
+        .addFilterBefore(requestSecurityFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(filter, RequestSecurityFilter.class);
     return http.build();
   }
 

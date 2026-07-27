@@ -15,7 +15,8 @@ export default function OnboardingPage() {
       const data = new FormData(event.currentTarget);
       const org = await api.createOrganization(String(data.get("name")), mode === "demo");
       await api.switchOrganization(org.id);
-      window.location.href = "/dashboard/incidents";
+      window.location.href =
+        mode === "demo" ? "/dashboard/getting-started" : "/dashboard/integrations";
     } catch (reason) {
       setError(reason instanceof ApiError ? reason.message : "Could not create the workspace.");
       setPending(false);

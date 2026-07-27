@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/incidents")
 public class IncidentController {
   private final IncidentService service;
+  private final com.vaibhav.runbookos.runbook.RunbookService runbooks;
 
-  public IncidentController(IncidentService service) {
+  public IncidentController(
+      IncidentService service, com.vaibhav.runbookos.runbook.RunbookService runbooks) {
     this.service = service;
+    this.runbooks = runbooks;
   }
 
   @GetMapping
@@ -69,6 +72,7 @@ public class IncidentController {
   @PostMapping("/demo")
   @ResponseStatus(HttpStatus.CREATED)
   public IncidentService.IncidentView demo(@AuthenticationPrincipal AuthenticatedUser user) {
+    runbooks.seedDemoRunbooks(requireOrg(user), user.userId());
     Incident i =
         service.ingest(
             requireOrg(user),

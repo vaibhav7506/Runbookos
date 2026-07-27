@@ -57,10 +57,11 @@ call gradlew.bat test
 goto :eof
 
 :test_frontend
-echo Running frontend checks...
+echo Running frontend tests and checks...
 cd "%ROOT%\apps\web"
 call npm run lint
 call npm run type-check
+call npm test
 goto :eof
 
 :health

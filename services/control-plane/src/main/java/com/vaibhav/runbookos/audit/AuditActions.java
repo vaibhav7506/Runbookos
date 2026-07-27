@@ -28,6 +28,8 @@ public final class AuditActions {
   public static final String INTEGRATION_CREATED = "INTEGRATION_CREATED";
   public static final String INTEGRATION_UPDATED = "INTEGRATION_UPDATED";
   public static final String INTEGRATION_DISCONNECTED = "INTEGRATION_DISCONNECTED";
+  public static final String INTEGRATION_VALIDATED = "INTEGRATION_VALIDATED";
+  public static final String INTEGRATION_USED = "INTEGRATION_USED";
   public static final String CREDENTIAL_STORED = "CREDENTIAL_STORED";
   public static final String CREDENTIAL_ROTATED = "CREDENTIAL_ROTATED";
   public static final String CREDENTIAL_REVOKED = "CREDENTIAL_REVOKED";

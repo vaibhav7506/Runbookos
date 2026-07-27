@@ -3,6 +3,7 @@
 import { useTheme } from "@/components/theme-provider";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { CommandPalette } from "@/components/command-palette";
 
 interface TopbarProps {
   onToggleSidebar: () => void;
@@ -44,29 +45,7 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
           </svg>
         </button>
 
-        {/* Command palette trigger (placeholder) */}
-        <button
-          className="hidden min-w-[200px] cursor-pointer items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-xs text-[var(--color-muted-text)] transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-border-elevated)] sm:flex"
-          aria-label="Open command palette"
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.3"
-            strokeLinecap="round"
-            aria-hidden="true"
-          >
-            <circle cx="6" cy="6" r="4.5" />
-            <path d="M9.5 9.5L13 13" />
-          </svg>
-          <span>Search or jump to…</span>
-          <kbd className="ml-auto rounded border border-[var(--color-border)] px-1 py-0.5 font-mono text-[10px] text-[var(--color-muted-text)]">
-            ⌘K
-          </kbd>
-        </button>
+        <CommandPalette />
       </div>
 
       {/* Right section */}
@@ -135,7 +114,7 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
           )}
         </button>
 
-        {/* User avatar placeholder */}
+        {/* User avatar */}
         <button
           className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[var(--color-hover)] text-xs font-medium text-[var(--color-secondary-text)] transition-all duration-[var(--duration-fast)] hover:ring-2 hover:ring-[var(--color-border-elevated)]"
           aria-label="User menu"

@@ -10,6 +10,21 @@ export default function IncidentsPage() {
   const [query, setQuery] = useState("");
   const [severity, setSeverity] = useState("");
   const [status, setStatus] = useState("");
+  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>(() =>
+    typeof window === "undefined"
+      ? []
+      : (JSON.parse(localStorage.getItem("runbookos_incident_filters") ?? "[]") as SavedFilter[])
+  );
+  function saveFilter() {
+    const name = window.prompt("Name this filter");
+    if (!name?.trim()) return;
+    const next = [
+      ...savedFilters.filter((filter) => filter.name !== name.trim()),
+      { name: name.trim(), query, severity, status },
+    ];
+    setSavedFilters(next);
+    localStorage.setItem("runbookos_incident_filters", JSON.stringify(next));
+  }
   const params = useMemo(() => {
     const p = new URLSearchParams();
     if (query) p.set("q", query);
@@ -42,7 +57,7 @@ export default function IncidentsPage() {
           Launch demo incident
         </Button>
       </header>
-      <div className="mt-7 grid gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:grid-cols-[1fr_160px_190px]">
+      <div className="mt-7 grid gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:grid-cols-[1fr_150px_180px_auto]">
         <label>
           <span className="sr-only">Search incidents</span>
           <input
@@ -73,7 +88,28 @@ export default function IncidentsPage() {
             "CLOSED",
           ]}
         />
+        <Button variant="secondary" onClick={saveFilter}>
+          Save filter
+        </Button>
       </div>
+      {savedFilters.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-xs text-[var(--color-muted-text)]">Saved:</span>
+          {savedFilters.map((filter) => (
+            <button
+              key={filter.name}
+              onClick={() => {
+                setQuery(filter.query);
+                setSeverity(filter.severity);
+                setStatus(filter.status);
+              }}
+              className="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs hover:bg-[var(--color-hover)]"
+            >
+              {filter.name}
+            </button>
+          ))}
+        </div>
+      )}
       {demo.error && <ErrorMessage error={demo.error} />}
       <section className="mt-5" aria-live="polite">
         {result.isLoading && (
@@ -128,6 +164,12 @@ export default function IncidentsPage() {
       </section>
     </div>
   );
+}
+interface SavedFilter {
+  name: string;
+  query: string;
+  severity: string;
+  status: string;
 }
 function Filter({
   label,

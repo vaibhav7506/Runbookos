@@ -4,7 +4,11 @@ import com.vaibhav.runbookos.common.TimeProvider;
 import com.vaibhav.runbookos.config.RunbookOsProperties;
 import com.vaibhav.runbookos.execution.*;
 import com.vaibhav.runbookos.security.HmacSigner;
+import io.github.resilience4j.bulkhead.*;
+import io.github.resilience4j.circuitbreaker.*;
+import io.github.resilience4j.retry.*;
 import java.util.*;
+import java.util.function.Supplier;
 import org.slf4j.*;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +30,9 @@ public class OutboxProcessor {
   private final ObjectMapper mapper;
   private final TimeProvider time;
   private final RestClient client;
+  private final CircuitBreaker circuitBreaker;
+  private final Retry retry;
+  private final Bulkhead bulkhead;
 
   public OutboxProcessor(
       OutboxEventRepository outbox,
@@ -35,7 +42,10 @@ public class OutboxProcessor {
       ObjectMapper mapper,
       TimeProvider time,
       RunbookOsProperties properties,
-      RestClient.Builder builder) {
+      RestClient.Builder builder,
+      CircuitBreakerRegistry circuitBreakers,
+      RetryRegistry retries,
+      BulkheadRegistry bulkheads) {
     this.outbox = outbox;
     this.executions = executions;
     this.tokens = tokens;
@@ -43,6 +53,9 @@ public class OutboxProcessor {
     this.mapper = mapper;
     this.time = time;
     this.client = builder.baseUrl(properties.n8n().baseUrl()).build();
+    this.circuitBreaker = circuitBreakers.circuitBreaker("n8nDispatch");
+    this.retry = retries.retry("n8nDispatch");
+    this.bulkhead = bulkheads.bulkhead("n8nDispatch");
   }
 
   @Scheduled(fixedDelayString = "${runbookos.n8n.outbox-poll-delay:1000}")
@@ -51,7 +64,7 @@ public class OutboxProcessor {
     for (OutboxEvent event : outbox.findReady(time.now(), PageRequest.of(0, 20))) {
       event.claim(time.nowTruncated());
       try {
-        dispatch(event);
+        resilientDispatch(event);
         event.delivered(time.nowTruncated());
       } catch (Exception ex) {
         log.warn(
@@ -59,6 +72,22 @@ public class OutboxProcessor {
         event.failed(ex.getMessage(), time.nowTruncated());
       }
     }
+  }
+
+  private void resilientDispatch(OutboxEvent event) {
+    Supplier<Void> operation =
+        () -> {
+          try {
+            dispatch(event);
+            return null;
+          } catch (Exception ex) {
+            throw new IllegalStateException("n8n dispatch unavailable", ex);
+          }
+        };
+    operation = Bulkhead.decorateSupplier(bulkhead, operation);
+    operation = CircuitBreaker.decorateSupplier(circuitBreaker, operation);
+    operation = Retry.decorateSupplier(retry, operation);
+    operation.get();
   }
 
   private void dispatch(OutboxEvent event) throws Exception {

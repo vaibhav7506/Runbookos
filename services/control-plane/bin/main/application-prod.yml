@@ -1,0 +1,24 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+
+runbookos:
+  security:
+    refresh-cookie-secure: true
+
+springdoc:
+  swagger-ui:
+    enabled: false
+
+management:
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLE_PROBABILITY:0.1}
+
+logging:
+  level:
+    root: INFO
+    com.vaibhav.runbookos: INFO
+    org.springframework.web.filter.CommonsRequestLoggingFilter: INFO

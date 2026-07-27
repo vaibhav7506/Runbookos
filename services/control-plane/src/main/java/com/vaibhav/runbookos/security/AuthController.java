@@ -136,9 +136,15 @@ public class AuthController {
   }
 
   public record SignupRequest(
-      @Email @NotBlank String email,
-      @Size(min = 12, max = 128) String password,
-      @NotBlank @Size(max = 120) String displayName) {}
+      @Email(message = "Enter a valid email address")
+          @NotBlank(message = "Email address is required")
+          String email,
+      @NotBlank(message = "Password is required")
+          @Size(min = 12, max = 128, message = "Password must be between 12 and 128 characters")
+          String password,
+      @NotBlank(message = "Name is required")
+          @Size(max = 120, message = "Name must be 120 characters or fewer")
+          String displayName) {}
 
   public record LoginRequest(@Email @NotBlank String email, @NotBlank String password) {}
 

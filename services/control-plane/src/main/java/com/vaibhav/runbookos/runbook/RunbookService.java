@@ -53,6 +53,165 @@ public class RunbookService {
     return detail(org, runbook.getId(), actor, version.getId());
   }
 
+  /** Seeds the three complete, safe demo runbooks once per organization. */
+  @Transactional
+  public List<RunbookSummary> seedDemoRunbooks(UUID org, UUID actor) {
+    access.require(org, actor, Role.OWNER, Role.ADMIN);
+    seedIfAbsent(
+        org,
+        actor,
+        "Deployment Regression Investigation",
+        "Correlates a deployment with changed commits and health signals, then approval-gates a simulated rollback.",
+        List.of(
+            demoStep(
+                1,
+                "deployment",
+                "Fetch recent deployment",
+                RunbookStepType.GITHUB_ACTION,
+                RiskClassification.READ_ONLY),
+            demoStep(
+                2,
+                "commits",
+                "Fetch changed commits",
+                RunbookStepType.GITHUB_ACTION,
+                RiskClassification.READ_ONLY),
+            demoStep(
+                3,
+                "health",
+                "Check health endpoints",
+                RunbookStepType.HTTP_REQUEST,
+                RiskClassification.READ_ONLY),
+            demoStep(
+                4,
+                "summarize",
+                "Summarize grounded evidence",
+                RunbookStepType.AI_RECOMMENDATION,
+                RiskClassification.READ_ONLY),
+            demoStep(
+                5,
+                "rollback",
+                "Simulate reversible rollback",
+                RunbookStepType.N8N_WORKFLOW,
+                RiskClassification.REVERSIBLE),
+            demoStep(
+                6,
+                "notify",
+                "Notify responders",
+                RunbookStepType.NOTIFICATION,
+                RiskClassification.READ_ONLY)));
+    seedIfAbsent(
+        org,
+        actor,
+        "External Dependency Failure",
+        "Checks provider status and prior evidence before approval-gating a fallback configuration.",
+        List.of(
+            demoStep(
+                1,
+                "provider-status",
+                "Check provider status",
+                RunbookStepType.HTTP_REQUEST,
+                RiskClassification.READ_ONLY),
+            demoStep(
+                2,
+                "errors",
+                "Inspect recent errors",
+                RunbookStepType.N8N_WORKFLOW,
+                RiskClassification.READ_ONLY),
+            demoStep(
+                3,
+                "history",
+                "Compare previous incidents",
+                RunbookStepType.N8N_WORKFLOW,
+                RiskClassification.READ_ONLY),
+            demoStep(
+                4,
+                "fallback",
+                "Recommend fallback",
+                RunbookStepType.AI_RECOMMENDATION,
+                RiskClassification.READ_ONLY),
+            demoStep(
+                5,
+                "configure",
+                "Simulate fallback configuration",
+                RunbookStepType.N8N_WORKFLOW,
+                RiskClassification.REVERSIBLE),
+            demoStep(
+                6,
+                "notify",
+                "Notify team",
+                RunbookStepType.NOTIFICATION,
+                RiskClassification.READ_ONLY)));
+    seedIfAbsent(
+        org,
+        actor,
+        "Credential or Authentication Failure",
+        "Diagnoses sanitized authentication failures and recommends human-controlled credential rotation.",
+        List.of(
+            demoStep(
+                1,
+                "auth-errors",
+                "Inspect sanitized auth errors",
+                RunbookStepType.N8N_WORKFLOW,
+                RiskClassification.READ_ONLY),
+            demoStep(
+                2,
+                "expiry",
+                "Check token expiry metadata",
+                RunbookStepType.N8N_WORKFLOW,
+                RiskClassification.READ_ONLY),
+            demoStep(
+                3,
+                "identify",
+                "Identify affected integration",
+                RunbookStepType.CONDITION,
+                RiskClassification.READ_ONLY),
+            demoStep(
+                4,
+                "rotation",
+                "Recommend credential rotation",
+                RunbookStepType.AI_RECOMMENDATION,
+                RiskClassification.READ_ONLY),
+            demoStep(
+                5,
+                "manual-rotation",
+                "Simulate credential rotation handoff",
+                RunbookStepType.MANUAL_TASK,
+                RiskClassification.REVERSIBLE)));
+    return list(org, actor);
+  }
+
+  private void seedIfAbsent(
+      UUID org, UUID actor, String name, String description, List<RunbookStep.StepDraft> drafts) {
+    if (runbooks.findByOrganizationIdOrderByUpdatedAtDesc(org).stream()
+        .anyMatch(value -> value.getName().equals(name))) return;
+    RunbookDetail created = create(org, new CreateRunbook(name, description), actor);
+    UUID runbookId = created.runbook().id();
+    UUID versionId = created.selectedVersion().id();
+    replaceDraftSteps(org, runbookId, versionId, drafts, actor);
+    publish(org, runbookId, versionId, IntegrationEnvironment.DEVELOPMENT, actor);
+  }
+
+  private static RunbookStep.StepDraft demoStep(
+      int sequence, String key, String name, RunbookStepType type, RiskClassification risk) {
+    return new RunbookStep.StepDraft(
+        key,
+        name,
+        "Demo-safe step with deterministic evidence and an explicit policy decision.",
+        sequence,
+        type,
+        risk,
+        Role.RESPONDER,
+        30,
+        1,
+        risk == RiskClassification.READ_ONLY
+            ? null
+            : "Restore the previous demo configuration; production credentials are never rotated automatically.",
+        risk == RiskClassification.HIGH_RISK
+            ? List.of(IntegrationEnvironment.DEVELOPMENT)
+            : List.of(IntegrationEnvironment.DEVELOPMENT, IntegrationEnvironment.STAGING),
+        Map.of("adapter", "DEMO", "simulated", true));
+  }
+
   @Transactional(readOnly = true)
   public List<RunbookSummary> list(UUID org, UUID actor) {
     access.require(org, actor);

@@ -77,6 +77,17 @@ public class AuditEvent {
   @Column(name = "occurred_at", nullable = false, updatable = false)
   private Instant occurredAt;
 
+  @Column(
+      name = "previous_hash",
+      nullable = false,
+      insertable = false,
+      updatable = false,
+      length = 64)
+  private String previousHash;
+
+  @Column(name = "event_hash", nullable = false, insertable = false, updatable = false, length = 64)
+  private String eventHash;
+
   protected AuditEvent() {
     // Required by JPA.
   }
@@ -165,6 +176,14 @@ public class AuditEvent {
 
   public Instant getOccurredAt() {
     return occurredAt;
+  }
+
+  public String getPreviousHash() {
+    return previousHash;
+  }
+
+  public String getEventHash() {
+    return eventHash;
   }
 
   @Override

@@ -120,6 +120,15 @@ public class Integration {
     this.updatedAt = at;
   }
 
+  public void markDegraded(String message, Instant at) {
+    this.status = IntegrationStatus.DEGRADED;
+    this.lastSuccessAt = at;
+    this.lastErrorAt = at;
+    this.lastErrorMessage =
+        message == null || message.length() <= 512 ? message : message.substring(0, 512);
+    this.updatedAt = at;
+  }
+
   /**
    * Records a failure. The message is truncated and is expected to already be sanitised by the
    * caller; integration adapters must never pass raw credentials or response bodies here.

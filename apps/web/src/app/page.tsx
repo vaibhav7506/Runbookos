@@ -97,11 +97,62 @@ export default function LandingPage() {
           <Link href="/login">
             <Button size="lg">Get Started</Button>
           </Link>
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+          <a
+            href="https://github.com/vaibhav7506/Runbookos"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Button variant="secondary" size="lg">
               View on GitHub
             </Button>
           </a>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-6 pb-16">
+        <div className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-dialog)]">
+          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-3">
+            <div>
+              <p className="text-xs font-semibold">SEV-1 · Checkout latency</p>
+              <p className="mt-0.5 text-[11px] text-[var(--color-muted-text)]">
+                Guided incident preview
+              </p>
+            </div>
+            <span className="rounded-full bg-[var(--color-critical-bg)] px-2.5 py-1 text-[10px] font-semibold text-[var(--color-critical)]">
+              INVESTIGATING
+            </span>
+          </div>
+          <div className="grid gap-px bg-[var(--color-border)] md:grid-cols-[1.2fr_1fr_0.8fr]">
+            {[
+              [
+                "Response timeline",
+                "Signal detected\nEvidence collected\nAI analysis grounded\nPolicy decision pending",
+              ],
+              [
+                "Evidence & analysis",
+                "Redis saturation\nP95 latency regression\n3 cited observations",
+              ],
+              ["Governed next step", "Rollback recommendation\nReversible · approval required"],
+            ].map(([title, copy]) => (
+              <div key={title} className="bg-[var(--color-surface)] p-5">
+                <h3 className="text-xs font-semibold">{title}</h3>
+                <p className="mt-3 text-xs leading-6 whitespace-pre-line text-[var(--color-secondary-text)]">
+                  {copy}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-8 grid gap-4 text-center sm:grid-cols-5">
+          {["Detect", "Collect", "Analyze", "Approve", "Learn"].map((step, index) => (
+            <div
+              key={step}
+              className="relative rounded-xl border border-[var(--color-border)] p-3 text-xs font-medium"
+            >
+              <span className="mr-2 text-[var(--color-muted-text)]">{index + 1}</span>
+              {step}
+            </div>
+          ))}
         </div>
       </section>
 

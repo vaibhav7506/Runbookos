@@ -148,6 +148,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/operations/dead-letters/{id}/redrive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["redrive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/internal/workflows/callbacks": {
         parameters: {
             query?: never;
@@ -180,7 +196,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/incidents/{incidentId}/analyses": {
+    "/api/integrations": {
         parameters: {
             query?: never;
             header?: never;
@@ -188,6 +204,54 @@ export interface paths {
             cookie?: never;
         };
         get: operations["list_1"];
+        put?: never;
+        post: operations["create_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/integrations/{id}/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["validate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/incidents/{incidentId}/postmortem": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["find"];
+        put?: never;
+        post: operations["generate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/incidents/{incidentId}/analyses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_2"];
         put?: never;
         post: operations["analyze"];
         delete?: never;
@@ -269,7 +333,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["create_2"];
+        post: operations["create_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -443,7 +507,55 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_2"];
+        get: operations["list_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/operations/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/operations/dead-letters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/integrations/{id}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["usage"];
         put?: never;
         post?: never;
         delete?: never;
@@ -548,6 +660,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/approvals": {
         parameters: {
             query?: never;
@@ -575,6 +703,22 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/integrations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["disconnect"];
         options?: never;
         head?: never;
         patch?: never;
@@ -767,6 +911,21 @@ export interface components {
             /** Format: uuid */
             organizationId?: string;
         };
+        DeadLetterView: {
+            /** Format: uuid */
+            id?: string;
+            aggregateType?: string;
+            /** Format: uuid */
+            aggregateId?: string;
+            eventType?: string;
+            /** Format: int32 */
+            attempts?: number;
+            lastError?: string;
+            /** @enum {string} */
+            status?: "PENDING" | "PROCESSING" | "DELIVERED" | "DEAD";
+            /** Format: date-time */
+            createdAt?: string;
+        };
         ApprovalView: {
             /** Format: uuid */
             id?: string;
@@ -809,6 +968,89 @@ export interface components {
             reason?: string;
             /** Format: date-time */
             decidedAt?: string;
+        };
+        SetupRequest: {
+            /** @enum {string} */
+            kind: "GITHUB" | "SENTRY" | "SLACK" | "EMAIL" | "JIRA" | "CUSTOM_WEBHOOK" | "HTTP_HEALTHCHECK";
+            name: string;
+            /** @enum {string} */
+            environment: "DEVELOPMENT" | "STAGING" | "PRODUCTION";
+            config?: {
+                [key: string]: unknown;
+            };
+            secret?: string;
+        };
+        /** @description Metadata about a stored integration secret. The value is never returned. */
+        CredentialSummaryResponse: {
+            /**
+             * Format: uuid
+             * @description Identifier of the credential record
+             */
+            id?: string;
+            /**
+             * @description Which secret this is within the integration
+             * @example token
+             */
+            credentialKey?: string;
+            /**
+             * @description Non-reversible short digest for operator confirmation
+             * @example 9f2a4c1b7e03
+             */
+            fingerprint?: string;
+            /**
+             * @description Master key used, for rotation tracking
+             * @example primary
+             */
+            keyId?: string;
+            /** @description True once the secret has been revoked and overwritten */
+            revoked?: boolean;
+            /**
+             * Format: date-time
+             * @description When the secret was first stored
+             */
+            createdAt?: string;
+            /**
+             * Format: date-time
+             * @description When the secret was last rotated or revoked
+             */
+            updatedAt?: string;
+        };
+        IntegrationView: {
+            /** Format: uuid */
+            id?: string;
+            /** @enum {string} */
+            kind?: "GITHUB" | "SENTRY" | "SLACK" | "EMAIL" | "JIRA" | "CUSTOM_WEBHOOK" | "HTTP_HEALTHCHECK";
+            name?: string;
+            /** @enum {string} */
+            environment?: "DEVELOPMENT" | "STAGING" | "PRODUCTION";
+            /** @enum {string} */
+            status?: "PENDING" | "CONNECTED" | "DEGRADED" | "DISCONNECTED" | "ERROR";
+            config?: {
+                [key: string]: unknown;
+            };
+            permissionExplanation?: string;
+            credentials?: components["schemas"]["CredentialSummaryResponse"][];
+            /** Format: date-time */
+            lastSuccessAt?: string;
+            /** Format: date-time */
+            lastErrorAt?: string;
+            lastErrorMessage?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        PostmortemView: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            incidentId?: string;
+            title?: string;
+            summary?: string;
+            impact?: string;
+            rootCause?: string;
+            resolution?: string;
+            followUpActions?: string[];
+            /** Format: date-time */
+            generatedAt?: string;
         };
         AnalysisView: {
             /** Format: uuid */
@@ -922,7 +1164,7 @@ export interface components {
         };
         SignupRequest: {
             email: string;
-            password?: string;
+            password: string;
             displayName: string;
         };
         AuthResponse: {
@@ -1007,6 +1249,41 @@ export interface components {
             outputTokenBudget?: number;
             costBudgetUsd?: number;
         };
+        OperationsOverview: {
+            systemStatus?: string;
+            uptime?: string;
+            /** Format: int64 */
+            activeIncidents?: number;
+            /** Format: int64 */
+            pendingApprovals?: number;
+            /** Format: int64 */
+            activeExecutions?: number;
+            /** Format: int64 */
+            unhealthyIntegrations?: number;
+            /** Format: int64 */
+            deadLetters?: number;
+            /** Format: int64 */
+            aiTokens?: number;
+            estimatedAiCostUsd?: number;
+            recentExecutions?: components["schemas"]["RecentExecution"][];
+        };
+        RecentExecution: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            incidentId?: string;
+            workflowKey?: string;
+            status?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        UsageView: {
+            operation?: string;
+            outcome?: string;
+            detail?: string;
+            /** Format: date-time */
+            occurredAt?: string;
+        };
         IncidentPage: {
             items?: components["schemas"]["IncidentView"][];
             nextCursor?: string;
@@ -1080,6 +1357,32 @@ export interface components {
             slug?: string;
             demoMode?: boolean;
             role?: string;
+        };
+        AuditPage: {
+            items?: components["schemas"]["AuditView"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            /** Format: int64 */
+            totalItems?: number;
+        };
+        AuditView: {
+            /** Format: uuid */
+            id?: string;
+            action?: string;
+            resourceType?: string;
+            resourceId?: string;
+            /** @enum {string} */
+            outcome?: "SUCCESS" | "FAILURE" | "DENIED";
+            actor?: string;
+            correlationId?: string;
+            integrityHash?: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            occurredAt?: string;
         };
         ErrorResponse: {
             code?: string;
@@ -1359,6 +1662,28 @@ export interface operations {
             };
         };
     };
+    redrive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeadLetterView"];
+                };
+            };
+        };
+    };
     callback: {
         parameters: {
             query?: never;
@@ -1415,6 +1740,116 @@ export interface operations {
         };
     };
     list_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IntegrationView"][];
+                };
+            };
+        };
+    };
+    create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetupRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IntegrationView"];
+                };
+            };
+        };
+    };
+    validate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IntegrationView"];
+                };
+            };
+        };
+    };
+    find: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                incidentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PostmortemView"];
+                };
+            };
+        };
+    };
+    generate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                incidentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PostmortemView"];
+                };
+            };
+        };
+    };
+    list_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1556,7 +1991,7 @@ export interface operations {
             };
         };
     };
-    create_2: {
+    create_3: {
         parameters: {
             query?: never;
             header: {
@@ -1831,7 +2266,7 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1847,6 +2282,70 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PolicyView"][];
+                };
+            };
+        };
+    };
+    overview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OperationsOverview"];
+                };
+            };
+        };
+    };
+    list_4: {
+        parameters: {
+            query?: {
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeadLetterView"][];
+                };
+            };
+        };
+    };
+    usage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UsageView"][];
                 };
             };
         };
@@ -1984,6 +2483,29 @@ export interface operations {
             };
         };
     };
+    list_5: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuditPage"];
+                };
+            };
+        };
+    };
     inbox: {
         parameters: {
             query?: {
@@ -2025,6 +2547,26 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["ApprovalView"];
                 };
+            };
+        };
+    };
+    disconnect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

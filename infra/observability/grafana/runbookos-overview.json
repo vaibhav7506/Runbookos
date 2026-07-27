@@ -1,0 +1,33 @@
+{
+  "title": "RunbookOS Operations",
+  "uid": "runbookos-operations",
+  "schemaVersion": 39,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Active incidents",
+      "targets": [{ "expr": "runbookos_incidents_active", "refId": "A" }],
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Workflow failures",
+      "targets": [{ "expr": "rate(runbookos_workflows_failures_total[5m])", "refId": "A" }],
+      "gridPos": { "x": 6, "y": 0, "w": 9, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Provider latency p95",
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(runbookos_providers_latency_seconds_bucket[5m])) by (le))", "refId": "A" }],
+      "gridPos": { "x": 15, "y": 0, "w": 9, "h": 5 }
+    },
+    {
+      "type": "stat",
+      "title": "Estimated AI cost",
+      "targets": [{ "expr": "runbookos_ai_estimated_cost_usd_total", "refId": "A" }],
+      "gridPos": { "x": 0, "y": 5, "w": 6, "h": 5 }
+    }
+  ]
+}

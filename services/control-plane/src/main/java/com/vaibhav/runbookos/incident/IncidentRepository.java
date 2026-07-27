@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface IncidentRepository extends JpaRepository<Incident, UUID> {
+  long countByOrganizationIdAndStatusNotIn(
+      UUID organizationId, java.util.Collection<IncidentStatus> statuses);
+
   Optional<Incident> findByIdAndOrganizationId(UUID id, UUID organizationId);
 
   Optional<Incident>
@@ -24,8 +27,8 @@ public interface IncidentRepository extends JpaRepository<Incident, UUID> {
       select i from Incident i where i.organizationId=:org
       and (:status is null or i.status=:status) and (:severity is null or i.severity=:severity)
       and (:service is null or i.affectedService=:service)
-      and (:cursor is null or i.lastSignalAt < :cursor)
-      and (:query is null or lower(i.title) like lower(concat('%',:query,'%')) or lower(i.affectedService) like lower(concat('%',:query,'%')))
+      and (cast(:cursor as timestamp) is null or i.lastSignalAt < :cursor)
+      and (:query = '' or lower(i.title) like concat('%',lower(:query),'%') or lower(i.affectedService) like concat('%',lower(:query),'%'))
       order by i.lastSignalAt desc, i.id desc
       """)
   Slice<Incident> search(

@@ -126,7 +126,7 @@ public class IncidentService {
             status,
             severity,
             blankToNull(service),
-            blankToNull(query),
+            query == null ? "" : query.trim(),
             cursor,
             PageRequest.of(0, Math.min(Math.max(size, 1), 100)));
     List<IncidentView> items = slice.getContent().stream().map(IncidentView::from).toList();

@@ -93,6 +93,18 @@ public class OutboxEvent {
     }
   }
 
+  public void redrive(Instant now) {
+    if (status != OutboxStatus.DEAD) {
+      throw new IllegalStateException("Only dead-letter events can be redriven");
+    }
+    status = OutboxStatus.PENDING;
+    attempts = 0;
+    nextAttemptAt = now;
+    claimedAt = null;
+    deliveredAt = null;
+    lastError = null;
+  }
+
   public UUID getId() {
     return id;
   }
@@ -119,5 +131,17 @@ public class OutboxEvent {
 
   public int getAttempts() {
     return attempts;
+  }
+
+  public OutboxStatus getStatus() {
+    return status;
+  }
+
+  public String getLastError() {
+    return lastError;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
   }
 }

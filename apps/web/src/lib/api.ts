@@ -19,6 +19,13 @@ import type {
   RuleRequest,
   ApprovalView,
   DecisionRequest,
+  IntegrationView,
+  IntegrationSetupRequest,
+  IntegrationUsageView,
+  PostmortemView,
+  OperationsOverview,
+  AuditPage,
+  DeadLetterView,
   PolicyPreview,
 } from "@runbookos/api-client";
 
@@ -30,7 +37,8 @@ export class ApiError extends Error {
     public readonly status: number,
     public readonly code: string,
     message: string,
-    public readonly correlationId?: string
+    public readonly correlationId?: string,
+    public readonly validationErrors: Array<{ field: string; message: string }> = []
   ) {
     super(message);
   }
@@ -75,7 +83,11 @@ async function request<T>(path: string, init: RequestInit = {}, retry = true): P
       response.status,
       error?.code ?? "REQUEST_FAILED",
       error?.message ?? "Request failed",
-      error?.correlationId
+      error?.correlationId,
+      error?.validationErrors?.map((item) => ({
+        field: item.field,
+        message: item.message,
+      })) ?? []
     );
   }
   return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
@@ -180,6 +192,27 @@ export const api = {
       method: "POST",
       body: JSON.stringify(value),
     }),
+  integrations: () => request<IntegrationView[]>("/api/integrations"),
+  createIntegration: (value: IntegrationSetupRequest) =>
+    request<IntegrationView>("/api/integrations", {
+      method: "POST",
+      body: JSON.stringify(value),
+    }),
+  validateIntegration: (id: string) =>
+    request<IntegrationView>(`/api/integrations/${id}/validate`, { method: "POST" }),
+  disconnectIntegration: (id: string) =>
+    request<void>(`/api/integrations/${id}`, { method: "DELETE" }),
+  integrationUsage: (id: string) =>
+    request<IntegrationUsageView[]>(`/api/integrations/${id}/usage`),
+  postmortem: (incidentId: string) =>
+    request<PostmortemView>(`/api/incidents/${incidentId}/postmortem`),
+  generatePostmortem: (incidentId: string) =>
+    request<PostmortemView>(`/api/incidents/${incidentId}/postmortem`, { method: "POST" }),
+  operationsOverview: () => request<OperationsOverview>("/api/operations/overview"),
+  auditEvents: (page = 0, size = 25) => request<AuditPage>(`/api/audit?page=${page}&size=${size}`),
+  deadLetters: () => request<DeadLetterView[]>("/api/operations/dead-letters"),
+  redriveDeadLetter: (id: string) =>
+    request<DeadLetterView>(`/api/operations/dead-letters/${id}/redrive`, { method: "POST" }),
 };
 
 export function authorizedStream(path: string, signal: AbortSignal) {
