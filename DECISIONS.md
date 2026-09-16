@@ -33,3 +33,27 @@ Append new dated entries; do not edit or delete earlier entries. Record secret n
 - **Decided by:** Human set the pause; agent autonomously preserved it rather than interpreting the conflicting request as deployment approval.
 - **Reasoning:** Free-tier availability and limits change, and choosing a platform could change persistence, availability, operational access, and cost. A no-cost claim must be verified before adoption.
 - **Implementation status:** Open decision; no resource created.
+
+## 2026-09-16 — no-cost backend preview hosting
+
+- **Question/finding:** The public Vercel deployment contains only the Next.js frontend. The Spring Boot API needs PostgreSQL and Redis, while the approved security design also requires n8n to remain private. Current free hosting limits do not support the entire four-service topology durably: Render free PostgreSQL expires after 30 days and free private services are unavailable; Railway Free is limited to three services and 0.5 GB RAM per service; Fly.io compute is usage-billed.
+- **Decision:** Use Render's free plan for a temporary Spring Boot API preview with free PostgreSQL and Key Value so authentication and API-backed flows can be exercised. Do not expose or deploy n8n publicly; leave n8n undeployed until a private-service-capable host is approved. Do not create billable Fly.io resources without explicit human cost approval.
+- **Decided by:** Agent autonomously selected the bounded no-cost preview path in response to the human's request to deploy the backend and earlier requirement to choose a free path.
+- **Reasoning:** This is the only examined path that can make the core API usable without incurring an unapproved charge while preserving the human's explicit prohibition on a public n8n domain. The deployment is a preview, not durable production, because the free database expires and free services can sleep.
+- **Implementation status:** Pending Render account authorization. No Render resources or billable Fly.io resources have been created. Secret values are not logged; production values will be generated for `JWT_SECRET`, `ENCRYPTION_KEY`, `INTERNAL_HMAC_SECRET`, database credentials, and Redis credentials when provisioning succeeds.
+
+## 2026-09-17 — same-origin API routing and refresh cookies
+
+- **Question/finding:** The Vercel frontend and Render API use different registrable domains. Direct browser calls can complete signup and login, but a `Secure; SameSite=Strict` refresh cookie cannot be relied on across those sites and its `/api/auth` path would not match a differently prefixed proxy route.
+- **Decision:** Route the frontend's existing `/api/*` paths through a Next.js rewrite to the Render API. Set `NEXT_PUBLIC_API_URL` to the Vercel production origin and keep the upstream URL in the server-side `API_PROXY_TARGET` variable. Keep `REFRESH_COOKIE_SECURE=true` and `SameSite=Strict` unchanged.
+- **Decided by:** Agent autonomously, as a deployment correction needed to preserve the human-approved secure-cookie policy.
+- **Reasoning:** Same-origin routing allows the browser to store and resend the refresh cookie on its existing `/api/auth` path without weakening cookie attributes or relying on third-party-cookie support.
+- **Implementation status:** Routing change prepared for verification and deployment. The upstream variable contains only the public API origin; secret values remain stored in Render and are not logged.
+
+## 2026-09-17 — backend preview deployment completed
+
+- **Question/finding:** The Render workspace already had its single free PostgreSQL and Key Value instances allocated to another project, so additional dedicated free datastores could not be created.
+- **Decision:** Create a separate `runbookos` database in the existing PostgreSQL instance and use Redis logical database 1. Deploy the control plane as the free `runbookos-api` web service in the same Oregon environment. Keep n8n undeployed rather than creating a public n8n service. Use `/actuator/health` for Render's liveness probe while retaining `/api/health` as the dependency-level readiness report that shows n8n unavailable.
+- **Decided by:** Agent autonomously within the human's request for a free backend deployment.
+- **Reasoning:** Database and Redis logical separation avoids overwriting the existing application's data and stays within the workspace's free-resource limits. The Actuator probe establishes that the API process can serve traffic; the detailed health endpoint continues to disclose the intentionally missing orchestration dependency instead of masking it.
+- **Implementation status:** Live API at `https://runbookos-api.onrender.com`; GitHub `main` auto-deploy is enabled. All nine Flyway migrations applied. Public smoke tests passed for Actuator health, signup, login, secure refresh-cookie issuance, and Vercel-origin CORS. Vercel production is being routed through the same-origin proxy. `JWT_SECRET`, `ENCRYPTION_KEY`, `INTERNAL_HMAC_SECRET`, PostgreSQL credentials, and Redis credentials are set in Render; values are not logged. The shared free PostgreSQL instance is scheduled to expire on 2026-10-01 unless upgraded or migrated.
