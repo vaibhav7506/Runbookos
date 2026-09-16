@@ -1,11 +1,13 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { Button, Input } from "@/components/ui";
 import { validateRegistration } from "@/lib/registration";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -22,7 +24,7 @@ export default function RegisterPage() {
     setPending(true);
     try {
       await api.signup(email, password, displayName);
-      window.location.href = "/onboarding";
+      router.push("/onboarding");
     } catch (reason) {
       if (reason instanceof ApiError) {
         setFieldErrors(

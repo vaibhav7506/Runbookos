@@ -282,7 +282,7 @@ export const api = {
   integrationUsage: (id: string) =>
     request<IntegrationUsageView[]>(`/api/integrations/${id}/usage`),
   postmortem: (incidentId: string) =>
-    request<PostmortemView>(`/api/incidents/${incidentId}/postmortem`),
+    request<PostmortemView | undefined>(`/api/incidents/${incidentId}/postmortem`),
   generatePostmortem: (incidentId: string) =>
     request<PostmortemView>(`/api/incidents/${incidentId}/postmortem`, { method: "POST" }),
   operationsOverview: () => request<OperationsOverview>("/api/operations/overview"),

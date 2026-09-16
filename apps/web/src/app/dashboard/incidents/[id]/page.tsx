@@ -497,7 +497,7 @@ function LoadError({ error, retry }: { error: Error; retry: () => void }) {
     </div>
   );
 }
-function Postmortem({ value }: { value: Awaited<ReturnType<typeof api.postmortem>> }) {
+function Postmortem({ value }: { value: NonNullable<Awaited<ReturnType<typeof api.postmortem>>> }) {
   return (
     <article className="print-postmortem rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
       <div className="flex items-start justify-between gap-4">

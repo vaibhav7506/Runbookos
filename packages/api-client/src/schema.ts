@@ -1816,7 +1816,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description OK */
+            /** @description Existing postmortem */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1824,6 +1824,13 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["PostmortemView"];
                 };
+            };
+            /** @description No postmortem has been generated yet */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

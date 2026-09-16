@@ -17,12 +17,24 @@ public class PostmortemController {
   }
 
   @GetMapping
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Existing postmortem",
+      content =
+          @io.swagger.v3.oas.annotations.media.Content(
+              schema =
+                  @io.swagger.v3.oas.annotations.media.Schema(
+                      implementation = PostmortemService.PostmortemView.class)))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "204",
+      description = "No postmortem has been generated yet",
+      content = @io.swagger.v3.oas.annotations.media.Content)
   public ResponseEntity<PostmortemService.PostmortemView> find(
       @PathVariable UUID incidentId, @AuthenticationPrincipal AuthenticatedUser user) {
     return service
         .find(requireOrg(user), incidentId, user.userId())
         .map(ResponseEntity::ok)
-        .orElseGet(() -> ResponseEntity.notFound().build());
+        .orElseGet(() -> ResponseEntity.noContent().build());
   }
 
   @PostMapping

@@ -18,12 +18,34 @@ async function authorized(
 
 test("onboards a user and completes the governed demo lifecycle", async ({ page }, testInfo) => {
   test.setTimeout(120_000);
+  const browserErrors: string[] = [];
+  const emptyResponses = new Set<string>();
+  page.on("pageerror", (error) => browserErrors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      browserErrors.push(`${message.text()} [${message.location().url}]`);
+    }
+  });
+  page.on("response", (response) => {
+    if (response.status() === 204) emptyResponses.add(response.url());
+    if (response.status() >= 400) browserErrors.push(`HTTP ${response.status()} ${response.url()}`);
+  });
+  page.on("requestfailed", (request) => {
+    if (request.url().includes("/api/")) {
+      browserErrors.push(`${request.method()} ${request.url()}: ${request.failure()?.errorText}`);
+    }
+  });
   const identity = `${Date.now()}-${testInfo.project.name}`;
   await page.goto("/register");
   await page.getByRole("textbox", { name: "Name" }).fill("Demo Responder");
   await page.getByRole("textbox", { name: "Email address" }).fill(`demo-${identity}@example.com`);
   await page.getByRole("textbox", { name: "Password" }).fill("DemoPassword42!");
+  const signupResponsePromise = page.waitForResponse(
+    (response) => response.url().endsWith("/api/auth/signup") && response.request().method() === "POST"
+  );
   await page.getByRole("button", { name: "Continue" }).click();
+  const signupResponse = await signupResponsePromise;
+  expect(signupResponse.ok(), `Signup returned HTTP ${signupResponse.status()}`).toBeTruthy();
   await expect(page.getByRole("heading", { name: "Create your response workspace" })).toBeVisible();
 
   await page.getByRole("textbox", { name: "Organization name" }).fill(`Demo ${identity}`);
@@ -71,6 +93,13 @@ test("onboards a user and completes the governed demo lifecycle", async ({ page 
   await expect(page.getByText("Resolution & postmortem")).toBeVisible();
   await page.getByRole("button", { name: "Generate postmortem" }).click();
   await expect(page.getByText("Learning artifact", { exact: true })).toBeVisible();
+  const unexpectedErrors = browserErrors.filter(
+    (error) =>
+      ![...emptyResponses].some(
+        (url) => error === `GET ${url}: net::ERR_ABORTED` && url.endsWith("/postmortem")
+      )
+  );
+  expect(unexpectedErrors, "The browser console and API requests should have no errors").toEqual([]);
 });
 
 test("registration and landing page have no serious accessibility violations", async ({ page }) => {
