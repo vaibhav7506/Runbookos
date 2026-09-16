@@ -51,14 +51,20 @@ describe("API client", () => {
     expect(requestHeaders(fetchMock).has("Authorization")).toBe(false);
   });
 
-  it("sends refresh without a bearer token", async () => {
+  it("sends refresh as JSON without a bearer token", async () => {
     setAccessToken("stale-token");
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(authResponse));
     vi.stubGlobal("fetch", fetchMock);
 
-    await request("/api/auth/refresh", { method: "POST", requiresAuth: false });
+    await request("/api/auth/refresh", {
+      method: "POST",
+      body: {},
+      requiresAuth: false,
+    });
 
     expect(requestHeaders(fetchMock).has("Authorization")).toBe(false);
+    expect(requestHeaders(fetchMock).get("Content-Type")).toBe("application/json");
+    expect((fetchMock.mock.calls[0]?.[1] as RequestInit).body).toBe("{}");
   });
 
   it("sends a bearer token for authenticated requests", async () => {

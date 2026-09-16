@@ -135,7 +135,7 @@ export async function request<T>(
     try {
       const auth = await request<AuthResponse>(
         "/api/auth/refresh",
-        { method: "POST", requiresAuth: false },
+        { method: "POST", body: {}, requiresAuth: false },
         false
       );
       setAccessToken(auth.accessToken);
